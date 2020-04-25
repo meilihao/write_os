@@ -102,10 +102,13 @@ The target architecture is set automatically (currently i386:x86-64)
 ## bochs
 **bochs最大的优点是可直接在其终端控制台上调试, 比qemu+gdb方便, 且寄存器显示的是64-bit**
 
+参考:
+- [用bochs调试自己写的系统引导代码](用bochs调试自己写的系统引导代码)
+
 ```
 $ sudo apt install bochs bochs-x # bochs-x要安装，否则启动模拟器时会报错: `>>PANIC<< dlopen failed for module 'x': file not found`，因为没有xwindows组件，无法显示图像
 $ vim bochsrc.txt # 创建bochs的配置文件, 参考[操作系统制作（0）bochs使用及img引导启动软盘制作](https://blog.csdn.net/qq_42138566/article/details/99005925)
-$ bochs -f bochsrx.txt # 使用指定配置启动模拟器, 当前terminal会变成它的控制台终端
+$ bochs -f bochsrx.txt # 使用指定配置启动模拟器(**其工具栏打`X`的ico表示该设备还未启用**), 当前terminal会变成它的控制台终端
 <bochs:10> u 0x7c00 0x7e00 # 反汇编mbr所在内存
 ```
 
@@ -116,7 +119,13 @@ bochs控制台命令:
 - b address :	在某物理地址上设置断点, 比如`b 0x7c00`
 - s 	: 单步执行
 - dump_cpu : 显示CPU中的所有寄存器和状态值
-- info cpu/r/sreg/creg : 查看寄存器信息
+- info : 查看信息
+
+    - cpu : cpu的寄存器
+    - r/reg/regs/registers : 列表显示CPU寄存器及其内容
+    - sreg : 列出CPU全部状态信息，包括各个段选择子（cs，ds等）以及ldtr和gdtr等
+    - creg : 列出所有的CR0-CR4寄存器
+    - tab : 页表
 - xp /nuf addr : 查看内存物理地址内容 	xp /10bx 0x100000
 - x /nuf addr :	查看线性地址内容 	x /40wd 0x90000
 - u start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令
