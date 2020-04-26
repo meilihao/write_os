@@ -83,9 +83,9 @@ gdb执行`target remote :1234`时报错, 且`info reg`读到的qemu寄存器与q
 
 解决方法: 升级到`5.0.0`, 还是会报该错, 但gdb和qemu monitor读到的寄存器已一致. 原因是[gdb和qemu没有协商成正确的mode(16-bit)](https://weinholt.se/articles/debugging-boot-sectors/), 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误.
 ### qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误
-qemu与gdb协商的arch结果是`i386:x86-64(32 bit)`, 而当前代码运行在实模式下(`16 bit`), 因此反汇编的结果会出错, 可参考[这里](https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr). 其他地方也有该错误信息[Bug 22869 - set architecture i8068 has no effect on disassembly, 未解决](https://sourceware.org/bugzilla/show_bug.cgi?id=22869).
+qemu与gdb协商的arch结果是`i386:x86-64(32 bit)`, 而当前代码运行在实模式下(`16 bit`), 因此反汇编的结果会出错, 可参考[这里](https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr).
 
-此时也无法在gdb中设置`set arch i8086`, 报:
+`qemu-system-x86_64`此时也无法在gdb中设置`set arch i8086`, 报:
 ```
 warning: Selected architecture i8086 is not compatible with reported target architecture i386:x86-64
 warning: A handler for the OS ABI "GNU/Linux" is not built into this configuration
@@ -94,6 +94,12 @@ of GDB.  Attempting to continue with the default i8086 settings.
 Architecture `i8086' not recognized. # 这句是关键
 The target architecture is set automatically (currently i386:x86-64)
 ```
+
+`qemu-system-i386`可以`set arch i8086`, 但反汇编还算错误.
+
+其他地方也有该错误信息
+- [Bug 22869 - set architecture i8068 has no effect on disassembly, 未解决](https://sourceware.org/bugzilla/show_bug.cgi?id=22869).
+- [qemu issue : qemu-system-x86_64+gdb: unable to correctly disassemble "real mode" (i8086) instructions after attaching to QEMU started with "-S -s" options](https://bugs.launchpad.net/qemu/+bug/1686170)
 
 也试过[Remote debugging of real mode code with gdb](https://ternet.fr/gdb_real_mode.html)提供的`gdb_init_real_mode.txt`, 同样不行.
 
