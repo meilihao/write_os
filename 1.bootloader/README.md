@@ -5,7 +5,7 @@
 1. 让qemu从软盘启动: `qemu-system-x86_64 -fda floppy.img`
 
 ## qemu调试boot.bin
-1. `qemu-system-x86_64  -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`
+1. `qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`
 1. 启动gdb
 
     1. 输入`gdb -q`
@@ -97,7 +97,17 @@ The target architecture is set automatically (currently i386:x86-64)
 
 也试过[Remote debugging of real mode code with gdb](https://ternet.fr/gdb_real_mode.html)提供的`gdb_init_real_mode.txt`, 同样不行.
 
-暂无法解决.
+已测试`qemu-system-x86_64`和`qemu-system-i386`:
+1. deepin 15.11 x86_64
+
+    - qemu: QEMU emulator version 4.2.94 // qemu 5.0.0-rc4
+    - gdb: GNU gdb (Debian 7.12-6) 7.12.0.20161007-git
+1. ubuntu 20.04
+
+    - qemu: QEMU emulator version 4.2.0 (Debian 1:4.2-3ubuntu6)
+    - gdb: GNU gdb (Ubuntu 9.1-0ubuntu1) 9.1
+
+都存在同样的问题, 暂无法解决. 推荐使用bochs调试boot.
 
 ## bochs
 **bochs最大的优点是可直接在其终端控制台上调试, 比qemu+gdb方便, 且寄存器显示的是64-bit**
