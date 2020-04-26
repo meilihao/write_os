@@ -97,7 +97,7 @@ The target architecture is set automatically (currently i386:x86-64)
 
 也试过[Remote debugging of real mode code with gdb](https://ternet.fr/gdb_real_mode.html)提供的`gdb_init_real_mode.txt`, 同样不行.
 
-已测试`qemu-system-x86_64`和`qemu-system-i386`:
+已测试`qemu-system-x86_64`和`qemu-system-i386`的[gdb_init_real_mode.txt](https://github.com/mhugo/gdb_init_real_mode/blob/master/gdbinit_real_mode.txt)和[target.xml](https://gist.githubusercontent.com/MatanShahar/1441433e19637cf1bb46b1aa38a90815/raw/2687fb5daf60cf6aa8435efc8450d89f1ccf2205/target.xml)方法:
 1. deepin 15.11 x86_64
 
     - qemu: QEMU emulator version 4.2.94 // qemu 5.0.0-rc4
@@ -107,7 +107,7 @@ The target architecture is set automatically (currently i386:x86-64)
     - qemu: QEMU emulator version 4.2.0 (Debian 1:4.2-3ubuntu6)
     - gdb: GNU gdb (Ubuntu 9.1-0ubuntu1) 9.1
 
-都存在同样的问题, 暂无法解决. 推荐使用bochs调试boot.
+都存在同样的问题, 暂无法解决. 因此推荐使用bochs调试boot.
 
 ## bochs
 **bochs最大的优点是可直接在其终端控制台上调试, 比qemu+gdb方便, 且寄存器显示的是64-bit**
