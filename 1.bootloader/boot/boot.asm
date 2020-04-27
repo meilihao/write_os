@@ -55,4 +55,4 @@ StartBootMessage:	db	"Start Boot" ; 定义字符串常量值. StartBootMessage�
 ;=======	fill zero until whole sector
 
 	times	510 - ($ - $$)	db	0 ; `$ - $$`=`$-0x7c00`:本行程序距离节（section）开始处的相对距离, 因此$~510间用0填充. times不是汇编指令, 是NASM的伪指令, 用来重复定义数据或指令.
-	dw	0xaa55 ; MBR(512字节) = 引导程序（446字节）+DPT分区表（64字节）+ 55AA结束标志（2字节）
+	dw	0xaa55 ; MBR(512字节) = 引导程序（446字节）+DPT分区表（64字节）+ 55AA结束标志（2字节, 因为cpu是小端, 因此内存中的顺序是0xaa55）
