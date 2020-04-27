@@ -9,16 +9,17 @@ Lable_Start:
     mov ds, ax
     mov es, ax
     mov ss, ax
-    mov sp, BaseOfStack ; 等价于`mv sp, 0x7c00`, 设置栈指针寄存器
+    mov sp, BaseOfStack ; 等价于`mv sp, 0x7c00`, 初始化栈指针寄存器, 让栈从0x7c00开始增长
 
 ; [汇编中的10H中断int 10h详细说明](https://blog.csdn.net/hua19880705/article/details/8125706)
 ; [INT_10H](https://zh.wikipedia.org/wiki/INT_10H)
-;=======	clear screen
+; 在没有操作系统的系统调用带来的好处时，各种功能的实现都需要用到中断，之后也会大量使用中断. 各中断的用法可以查阅处理器对应的文档.
+;=======	clear screen : 因为之前bios输出过东西
 
 	mov	ax,	0600h ; h表示16进制, **推荐使用`0x`开头的写法**. eax是32位, 其低8位是8位寄存器al, 紧靠的8位是ah; 低16位是ax. 因此ah=0x06, al=0
 	mov	bx,	0700h ; `struct carattr attr = {' ', regs->bh, 1};`即attr属性的一部分
 	mov	cx,	0 ; (CH、CL)＝ 窗口的左上角位置(Y坐标，X坐标)
-	mov	dx,	0184fh ; (DH、DL)＝窗口的右下角位置(Y坐标，X坐标)
+	mov	dx,	184fh ; (DH、DL)＝窗口的右下角位置(Y坐标，X坐标)
 	int	10h ; 触发中断`int	10h`. qemu默认使用seabios, 在seabios-1.13.0代码中查找`INT 10h`, 在`vgasrc/vgabios.c`中找到`handle_10`, 因ah=0x06->`handle_1006`, 为向上滚屏, AL＝滚动行数(0即清窗口)
 
 ;=======	set focus
