@@ -1,0 +1,49 @@
+# You many now use double quotes around pathnames, in case
+# your pathname includes spaces.
+
+#=======================================================================
+# MEGS
+#内存16MB
+#=======================================================================
+megs: 16
+
+#=======================================================================
+# ROMIMAGE:
+# The ROM BIOS controls what the PC does when it first powers on. 
+#BIOS选择BIOS-bochs-latest
+#=======================================================================
+romimage: file=$BXSHARE/BIOS-bochs-latest 
+
+#=======================================================================
+# VGAROMIMAGE
+# You now need to load a VGA ROM BIOS into C0000.
+#VGABIOS选择VGABIOS-lgpl-latest
+#=======================================================================
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+#=======================================================================
+# FLOPPYA, FLOPPYB:
+# Point this to pathname of floppy image file or device
+#软盘a选择boot.img，状态为inserted
+#=======================================================================
+floppya: 1_44="fat12_demo.img", status=inserted
+
+
+#=======================================================================
+# BOOT:
+#引导启动盘选择a盘
+#=======================================================================
+boot: a
+#boot: c
+
+#=======================================================================
+# LOG:
+# Give the path of the log file you'd like Bochs debug and misc. 
+#log输出选择/dev/null设备，丢弃。log文件输出会很大！！！
+#=======================================================================
+log: /dev/null
+#log: bochsout.txt
+
+#=======================================================================
+# VGA_UPDATE_INTERVAL:
+#=======================================================================

@@ -58,3 +58,36 @@ LBA=`(C-CS)*PH*PS + (H-HS)*PS + (S-SS)`, 其中CS表示起始柱面号，HS表�
 > 通常机械硬盘的标签上有标明LBA与CHS.
 
 > 在实模式下，访问ATA硬盘有两种方法: 调用BIOS INT 13中断和直接用IN/OUT指令读写相应端口.
+
+## 构建测试用的fat12 img
+参考:
+- [实现一个简单的64位操作系统 (0x03)FAT12文件系统](https://zhuanlan.zhihu.com/p/43296291)
+
+直接通过汇编写fat12有些不直观, 而通过使用[C语言对FAT12的镜像文件进行解析](parse_fat12.c)，能够熟悉FAT12文件系统，同时，之后的loader实现只需要将C实现人工“翻译”成汇编即可.
+
+![FAT12的结构图](fat12.png)
+
+构建fat12:
+1. dd if=/dev/zero bs=1024 count=1440 of=fat12_demo.img
+1. mkfs.fat -F 12 fat12_demo.img
+1. write data:
+    ```bash
+    # mkdir /mnt/img
+    # mount fat12_demo.img /mnt/img
+    # cd /mnt/img
+    # echo "hello fat12" > readme.txt
+    # ls
+    readme.txt*
+    # mkdir dir
+    # cd dir
+    # echo "this is a file @ /dir" > secend.md
+    # cd ..
+    # tree
+    .
+    ├── dir
+    │   └── secend.md
+    └── readme.txt
+
+    1 directory, 2 files
+    # umount /mnt/img
+    ```
