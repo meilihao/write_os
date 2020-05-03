@@ -1,6 +1,9 @@
 # 构建引导程序
 1. 创建1.44M的软盘: `dd if=/dev/zero of=floppy.img bs=1024 count=1440`
-1. 编译boot即引导程序: `nasm -f elf64 boot.asm -o boot.bin`
+1. 编译boot即引导程序:
+
+    - as: `as -o boot.o boot.asm && ld -Ttext 0x7c00 --oformat=binary boot.o -o boot.bin` # 0x7c00是由ld指定, 而不是像nasm那样用`.org`指定
+    - nasm: `nasm -f bin boot_nasm.asm -o boot.bin`
 1. 将boot.bin写入引导扇区: `dd if=boot.bin of=floppy.img bs=512 count=1 conv=notrunc`, `conv`允许在写入数据后不截断(即改变)输出文件的大小.
 1. 让qemu从软盘启动: `qemu-system-x86_64 -fda floppy.img`
 
@@ -73,7 +76,12 @@
 
 ## 其他
 - 查看boot.bin: `hexdump -C boot.bin`
-- 反汇编boot.bin: `ndisasm -o 0x7c00 boot.bin`, 因为没有elf header, 因此不能使用objdump. `-o`即origin
+- 反汇编boot.bin: 
+
+    - as: `objdump -m i8086 -b binary -D  boot.bin` // `-d`仅反汇编特定section, 这里必须用`-D`反汇编所有section
+    - nasm: `ndisasm -o 0x7c00 boot.bin`, 因为没有elf header, 因此不能使用objdump. `-o`即origin
+    
+    ga只能反汇编`.o`: `objdump -m i8086 -d boot.o` # objdump需指定m参数, 此时`lea	bp,	StartBootMessage`=`8d 2e 00 00             lea    0x0,%bp`还未设置偏移
 
 ![效果](boot.bin.gif)
 
