@@ -26,7 +26,7 @@ vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 # Point this to pathname of floppy image file or device
 #软盘a选择boot.img，状态为inserted
 #=======================================================================
-floppya: 1_44="fat12_demo.img", status=inserted
+floppya: 1_44="floppy.img", status=inserted
 
 
 #=======================================================================

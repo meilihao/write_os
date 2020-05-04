@@ -4,6 +4,7 @@
 - [读取磁盘：CHS方式](https://www.cnblogs.com/mlzrq/p/10223053.html)
 - [直接读一个软盘扇区](https://my.oschina.net/u/580100/blog/526788)
 - [<<微型计算机原理与接口技术>>]
+- [FatFs 之三 FAT文件系统基础、FAT 数据格式、引导、编码](https://blog.csdn.net/ZCShouCSDN/article/details/97610903)
 
 1. LBA与CHS
 硬盘的寻址方式主要有两种：
@@ -91,3 +92,23 @@ LBA=`(C-CS)*PH*PS + (H-HS)*PS + (S-SS)`, 其中CS表示起始柱面号，HS表�
     1 directory, 2 files
     # umount /mnt/img
     ```
+## 部署loader
+```bash
+$ as -o loader.o loader.s
+$ ld -Ttext 0x10000 --oformat=binary loader.o -o loader.bin # 0x10000=64k // 报错???没超出1M呀
+loader.o: In function `_start':
+(.text+0x22): relocation truncated to fit: R_X86_64_16 against `.text'+28 # 官方的例子没出错是因为它用了相对定位; 而用ld编出的文件反编译后发现是绝对定位
+$ ld -Ttext 0x0 --oformat=binary loader.o -o loader.bin # 等价于`org 0x0`, 启用相对定位, 因为boot已帮忙拷到指定位置并跳转到该位置继续执行, 因此它不需要像`1.bootloader/boot`那样需指定在0x7c00开始运行.
+$ cp fat12_demo floppy.img
+$ mkdir fat
+$ sudo mount fat12_demo.img ./fat
+$ sudo cp loader.bin fat
+$ sudo umount fat
+$ dd if=boot.bin of=floppy.img bs=512 count=1 conv=notrunc
+$ bochs -f bochsrc.txt
+```
+
+简化运行:
+```
+$ ./has_loader.sh
+```

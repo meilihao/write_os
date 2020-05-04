@@ -1,4 +1,6 @@
 // [FAT32文件系统介绍中文版](https://wenku.baidu.com/view/8b483d6baf1ffc4ffe47ac75.html)
+// [详解FAT12文件系统](https://blog.csdn.net/qq_39654127/article/details/88429461)
+// FAT12文件系统的文件名是不区分大小写字母的, 小写都会被转成大写
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -207,7 +209,7 @@ uint32_t ReadFile(unsigned char *pImageBuffer, PFILE_HEADER pFileHeader)
         next = GetFATNext(pbStartOfFATTab, next);
     }while(next <= 0xfef);
 
-    printf("\nfile size: %d, file content:\n^%s$\n\n", readBytes,outBuffer);// file size指占用的cluster, 而不是实际大小
+    printf("\nfile used size in  : %d, file content:\n^%s$\n\n", readBytes,outBuffer);// file size指占用的cluster, 而不是实际大小
 
     return readBytes;
 }
@@ -234,7 +236,7 @@ void SeekRootDir(unsigned char *pImageBuffer)
     PFILE_HEADER pFileHeader = (PFILE_HEADER)(pImageBuffer + dwRootDirStartBytes);
 
     int fileNum = 1;
-    while(rootEntCnt > 0)
+    while(rootEntCnt > 0 && *((uint8_t *)(pFileHeader)) !=0 && *((uint8_t *)(pFileHeader)) !=0xe5 )
     {
         char buffer[20];
         memcpy(buffer,pFileHeader->DIR_Name,11); // 文件名
@@ -243,7 +245,8 @@ void SeekRootDir(unsigned char *pImageBuffer)
         printf("File no.            %d\n", fileNum);
         printf("File name:          %s\n", buffer);
         printf("File attributes:    0x%02x\n", pFileHeader->DIR_Attr);
-        printf("First clus num:     %u\n\n", pFileHeader->DIR_FstClus);
+        printf("First clus num:     %u\n", pFileHeader->DIR_FstClus);
+        printf("File real size:     %u\n\n", pFileHeader->DIR_FileSize);
 
         if ((pFileHeader->DIR_Attr & 0x10) == 0) { // 0x10是目录
             printf("is file\n");

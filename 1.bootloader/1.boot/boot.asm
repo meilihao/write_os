@@ -5,11 +5,11 @@
 .intel_syntax noprefix
 .code16
 .equ BaseOfStack, 0x7c00 # equ作用: 让其左边的标识符可代表右边的表达式, 并不会给标识符分配内存. 标识符不能重名, 也不能重新定义.
-.text
+.section .text
 .globl _start
 _start:
 	# . = _start + 510     #mov to 510th byte from 0 pos
-    mov ax, cs # 用cs寄存器的段基地址设置到ax, ds, es, ss
+    mov ax, cs # 用cs=0寄存器的段基地址设置到ax, ds, es, ss. cpu刚加电时cs有值是cs:0xf000, 但bios跳到boot前已被重置为0
     mov ds, ax
     mov es, ax
     mov ss, ax
