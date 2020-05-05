@@ -91,6 +91,10 @@ gdb执行`target remote :1234`时报错, 且`info reg`读到的qemu寄存器与q
 
 解决方法: 升级到`5.0.0`, 还是会报该错, 但gdb和qemu monitor读到的寄存器已一致. 原因是[gdb和qemu没有协商成正确的mode(16-bit)](https://weinholt.se/articles/debugging-boot-sectors/), 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误.
 ### qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误
+参考:
+- [qemu 2.0与gdb连接调试内核时出现"Remote 'g' packet reply is too long"问题分析](https://bbs.pediy.com/thread-255296.htm)
+- [qemu+gdb调试内核出现remote ‘g’ packet reply is too long](http://www.mamicode.com/info-detail-2862637.html)
+
 qemu与gdb协商的arch结果是`i386:x86-64(32 bit)`, 而当前代码运行在实模式下(`16 bit`), 因此反汇编的结果会出错, 可参考[这里](https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr).
 
 `qemu-system-x86_64`此时也无法在gdb中设置`set arch i8086`, 报:
@@ -104,6 +108,8 @@ The target architecture is set automatically (currently i386:x86-64)
 ```
 
 `qemu-system-i386`可以`set arch i8086`, 但反汇编还算错误.
+
+其他尝试, 先执行`set arch i8086`, 再执行`target remote`会碰到`Remote 'g' packet reply is too long`.
 
 其他地方也有该错误信息
 - [Bug 22869 - set architecture i8068 has no effect on disassembly, 未解决](https://sourceware.org/bugzilla/show_bug.cgi?id=22869).
@@ -122,6 +128,13 @@ The target architecture is set automatically (currently i386:x86-64)
     - gdb: GNU gdb (Ubuntu 9.1-0ubuntu1) 9.1
 
 都存在同样的问题, 暂无法解决. 因此推荐使用bochs调试boot.
+
+[找到该问题的其他解释](http://www.yonch.com/tech/84-debugging-the-linux-kernel-with-qemu-and-eclipse):
+```
+Note that other tutorials also add a “-S” parameter so QEMU starts the kernel stopped, however this is ommitted deliberately. The “-S” parameter would allow gdb to set an initial breakpoint anywhere in the kernel before kernel execution begins. Unfortunately, a change made to the gdbserver in QEMU, to support debugging 32- and 16-bit guest code in an x86_64 session breaks the -S functionality. The symptoms are that gdb prints out “Remote ‘g’ packet reply is too long:”, and fails to interact successfully with QEMU. The suggested fix is to run the QEMU until it is in 64-bit code (i.e. after the boot loader has finished and the kernel started) before connecting from gdb (omitting the -S parameter). To debug a running kernel, this is sufficient; it is the method we will take.
+
+# 简单翻译: 对QEMU中的gdbserver进行的更改（以支持在x86_64会话中调试32位和16位guest代码）破坏了-S功能, 因此用gdb调试16-bit就是无解了, 还是乖乖使用bochs.
+```
 
 ## bochs
 **bochs最大的优点是可直接在其终端控制台上调试, 比qemu+gdb方便, 且寄存器显示的是64-bit**
