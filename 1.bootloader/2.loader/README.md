@@ -95,9 +95,9 @@ LBA=`(C-CS)*PH*PS + (H-HS)*PS + (S-SS)`, 其中CS表示起始柱面号，HS表�
 ## 部署loader
 ```bash
 $ as -o loader.o loader.s
-$ ld -Ttext 0x10000 --oformat=binary loader.o -o loader.bin # 0x10000=64k // 报错???没超出1M呀
+$ ld -Ttext 0x10000 --oformat=binary loader.o -o loader.bin # 0x10000=64k // [报错原因](https://stackoverflow.com/questions/61617819/ld-ttext-0x10000-oformat-binary-loader-o-o-loader-bin-not-work): `-Ttext`仅是`seg:off`的off部分, 在16-bit下off最大值是0xFFFF(b4K), 0x10000明显超出了.
 loader.o: In function `_start':
-(.text+0x22): relocation truncated to fit: R_X86_64_16 against `.text'+28 # 官方的例子没出错是因为它用了相对定位; 而用ld编出的文件反编译后发现是绝对定位
+(.text+0x22): relocation truncated to fit: R_X86_64_16 against `.text'+28 # 官方的例子没出错是因为它用了相对定位
 $ ld -Ttext 0x0 --oformat=binary loader.o -o loader.bin # 等价于`org 0x0`, 启用相对定位, 因为boot已帮忙拷到指定位置并跳转到该位置继续执行, 因此它不需要像`1.bootloader/boot`那样需指定在0x7c00开始运行.
 $ cp fat12_demo floppy.img
 $ mkdir fat
