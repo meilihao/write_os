@@ -19,3 +19,6 @@ Loader引导加载程序负责检测硬件信息 、 处理器模式切换、向
 ```
 <bochs:5> info gdt
 ```
+
+## 进度
+读取kernel.bin时报错, 原因: [自己写的代码与bochs的运行代码不一致](https://stackoverflow.com/questions/61666472/what-self-written-asm-dont-match-bochs).
