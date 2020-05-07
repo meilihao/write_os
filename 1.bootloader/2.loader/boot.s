@@ -5,6 +5,7 @@
 
 .equ BaseOfStack,	0x7c00
 
+# 在内存的64k位置
 .equ BaseOfLoader, 0x1000
 .equ OffsetOfLoader, 0x00
 
@@ -224,7 +225,7 @@ Load_File:
 	pop ax # 取Load_FAT保存的有效簇号
 	call Read_Clusters
 		
-	jmp BaseOfLoader:OffsetOfLoader # 段间地址跳转. 当 JMP指令执行后, cs寄存器 的值就是BaseOfLoader(0xlOOO ). 在实模式下,代码段寄存器的值必须左移4位后才转换成段基地址,即 Ox1OOO<<4 = Ox1OOOO.
+	jmp BaseOfLoader:OffsetOfLoader # 段间地址跳转. 当 JMP指令执行后, cs寄存器 的值就是BaseOfLoader(0x1OOO ). 在实模式下,代码段寄存器的值必须左移4位后才转换成段基地址,即 Ox1OOO<<4 = Ox1OOOO.
 
 Read_Clusters:
 #
@@ -248,7 +249,7 @@ Read_Clusters:
 	add ax, SectorDataStart # 数据的开始扇区号
 	
 	xor ch, ch # 避免下面的Func_ReadSectors受错误影响
-	mov cl,      byte ptr [BPB_SecPerClus]      # Sectors to read
+	mov cl,      byte ptr [BPB_SecPerClus]      # N Sectors to read
 	mov bx, di # int 13始终使用es:bx作为缓冲区地址
 	call Func_ReadSectors                            # Read the sectors
 
@@ -306,7 +307,7 @@ Read_Clusters:
     mov dx, es                                  # overlaps a 64k page boundry, when di overflows
     add dh, 0x10                                # it will trigger the carry flag, so correct
     mov es, dx                                  # extra segment by 0x1000
-		# range : 0x8000~0x10
+	# es+=(0x1000 << 4) = 64k, di溢出部分会被丢弃, 加上进位后的es,刚好相等
 
     jmp .clusterLoop                            # Load the next file cluster
 
