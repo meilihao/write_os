@@ -164,6 +164,7 @@ bochs控制台命令:
     - creg : 列出所有的CR0-CR4寄存器
     - tab : 页表
     - gdt
+    - symbols
 - xp /nuf addr : 查看内存物理地址内容 	xp /10bx 0x100000
 - x /nuf addr :	查看线性地址内容 	x /40wd 0x90000; x /10bx ds:0x1a
 - u start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令

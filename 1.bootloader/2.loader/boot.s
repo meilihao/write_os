@@ -212,7 +212,7 @@ Load_FAT:
 	mov	ax,	0x00
 	mov	es,	ax
 	mov	bx,	0x8000 # es:bx=>数据缓冲区
-	mov	ax,	word ptr [BPB_RsvdSecCnt] # 插入待读取的LBA扇区号
+	mov	ax,	word ptr [BPB_RsvdSecCnt] # 待读取的起始LBA扇区号
 	mov	cx,	word ptr [BPB_FATSz16] # 要读入的扇区个数
 	call	Func_ReadSectors
 
