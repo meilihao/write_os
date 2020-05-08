@@ -143,11 +143,13 @@ Note that other tutorials also add a “-S” parameter so QEMU starts the kerne
 - [用bochs调试自己写的系统引导代码](用bochs调试自己写的系统引导代码)
 
 ```
-$ sudo apt install bochs bochs-x # bochs-x要安装，否则启动模拟器时会报错: `>>PANIC<< dlopen failed for module 'x': file not found`，因为没有xwindows组件，无法显示图像
+$ sudo apt install bochs bochs-x bochsbios vgabios # bochs-x要安装，否则启动模拟器时会报错: `>>PANIC<< dlopen failed for module 'x': file not found`，因为没有xwindows组件，无法显示图像
 $ vim bochsrc.txt # 创建bochs的配置文件, 参考[操作系统制作（0）bochs使用及img引导启动软盘制作](https://blog.csdn.net/qq_42138566/article/details/99005925)
 $ bochs -f bochsrx.txt # 使用指定配置启动模拟器(**其工具栏打`X`的ico表示该设备还未启用**), 当前terminal会变成它的控制台终端
 <bochs:10> u 0x7c00 0x7e00 # 反汇编mbr所在内存
 ```
+
+> bochs 2.6.11 的bios,vgabios要单独安装否则会报`couldn't open ROM image file '/usr/share/bochs/${BIOS-bochs|VGABIOS-lgpl}-latest'`, bochs 2.6则不需要.
 
 bochs控制台命令:
 - h : 查看命令的help
