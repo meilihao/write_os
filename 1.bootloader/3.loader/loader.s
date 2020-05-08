@@ -4,6 +4,8 @@
 .equ BaseTmpOfKernelAddr, 0x00
 .equ OffsetTmpOfKernelFile, 0x7E00 # kernel.bin的临时转存空间
 
+.equ MemoryStructBufferAddr, 0x7E00 # 保存内存空间信息
+
 .equ BaseOfKernelFile,	0x00
 .equ OffsetOfKernelFile, 0x100000 # 1M处
 
@@ -326,7 +328,202 @@ KillMotor: # 关闭软盘
 	lea bp, CopyKernelDone
 	call PrintInfo
 
+# =======	get memory address size type
+	mov cx,24
+	lea bp, StartGetMemStructMessage
+	call PrintInfo
+
+	# 7e00在kernel.bin复制走后用作保存物理地址空间信息
+	mov	ebx,	0
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	di,	MemoryStructBufferAddr	# 操作系统会在初始化内存管理单元时解析该结构体数组
+
+Label_Get_Mem_Struct:
+
+	# 
+	mov	eax,	0x0E820
+	mov	ecx,	20 # size of buffer for result, in bytes (should be >= 20 bytes)
+	mov	edx,	0x534D4150 # ('SMAP')
+	int	0x15 # [Newer BIOSes - GET SYSTEM MEMORY MAP](http://www.ctyme.com/intr/rb-1741.htm). ES:DI -> buffer for result
+	jc	Label_Get_Mem_Fail
+	add	di,	20
+
+	cmp	ebx,	0 # 还有要读取的内容, 因此此时ebx是下一次继续拷贝时的偏移量
+	jne	Label_Get_Mem_Struct
+	jmp	Label_Get_Mem_OK
+
+Label_Get_Mem_Fail:
+
+	mov cx,23
+	lea bp, GetMemStructErrMessage
+	call PrintError
+
+	jmp	$
+
+Label_Get_Mem_OK:
+	
+	mov cx,29
+	lea bp, GetMemStructOKMessage
+	call PrintInfo
+
+# =======	get SVGA information
+
+	mov cx,23
+	lea bp, StartGetSVGAVBEInfoMessage
+	call PrintInfo
+
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	di,	0x8000
+	mov	ax,	0x4F00
+	int	0x10 # [VESA SuperVGA BIOS (VBE) - GET SuperVGA INFORMATION](http://www.ctyme.com/intr/rb-0273.htm)
+
+	# AL = 4Fh if function supported
+	# AH = status
+	# 00h successful
+	cmp	ax,	0x004F
+
+	jz	.KO
+	
+# =======	Fail
+
+	mov cx,23
+	lea bp, GetSVGAVBEInfoErrMessage
+	call PrintError
+
+	jmp	$
+
+.KO:
+
+	mov cx,29
+	lea bp, GetSVGAVBEInfoOKMessage
+	call PrintInfo
+	
+# =======	Get SVGA Mode Info
+
+	mov cx,24
+	lea bp, StartGetSVGAModeInfoMessage
+	call PrintInfo
+
+
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	si,	0x800e # [获取到的supervga信息 : Format of SuperVGA information](http://www.ctyme.com/intr/rb-0273.htm)
+
+	mov	esi,	dword ptr	es:[si] # pointer to list of supported VESA and OEM video modes (list of words terminated with FFFFh
+	mov	edi,	0x8200
+
+Label_SVGA_Mode_Info_Get:
+
+	mov	cx,	word ptr	es:[esi]
+
+# =======	display SVGA mode information
+
+	push	ax
+	
+	mov	ax,	0x00
+	mov	al,	ch # from cx
+	call	Label_DispAL
+
+	mov	ax,	0x00
+	mov	al,	cl	# from cx
+	call	Label_DispAL
+	
+	pop	ax
+
+# =======
+	
+	cmp	cx,	0x0FFFF
+	jz	Label_SVGA_Mode_Info_Finish
+
+	# CX = SuperVGA video mode (see #04082 for bitfields) from 上面的es:[si]
+	# ES:DI -> 256-byte buffer for mode information (see #00079)
+	mov	ax,	0x4F01
+	int	0x10 # [VESA SuperVGA BIOS - GET SuperVGA MODE INFORMATION](http://www.ctyme.com/intr/rb-0274.htm)
+
+	cmp	ax,	0x004F # 0x004F 成功的标志
+
+	jnz	Label_SVGA_Mode_Info_FAIL	# 不成功
+
+	add	esi,	2
+	add	edi,	0x100 # = 256
+
+	jmp	Label_SVGA_Mode_Info_Get
+
+Label_SVGA_Mode_Info_FAIL:
+
+	mov cx,24
+	lea bp, GetSVGAModeInfoErrMessage
+	call PrintError
+
+Label_SET_SVGA_Mode_VESA_VBE_FAIL:
+
+	jmp	$
+
+Label_SVGA_Mode_Info_Finish:
+
+	mov cx,30
+	lea bp, GetSVGAModeInfoOKMessage
+	call PrintInfo
+
 	jmp $
+
+# =======	set the SVGA mode(VESA VBE)
+
+	mov	ax,	0x4F02
+	mov	bx,	0x4180	# ========================mode : 0x180(1440*900) or 0x143(800*600) from bochs svga芯片
+	int 	0x10
+
+	cmp	ax,	0x004F
+	jnz	Label_SET_SVGA_Mode_VESA_VBE_FAIL
+
+	jmp $
+
+# =======	display num in al
+# 保存即将变更的寄存器值到战中,然后把变量 DisplayPosition保存的屏幕偏移值(字符游标索引值)载入到EDI寄存器中,并向 AH寄存器存入字体的颜色属性值
+
+# 调用 Label_DispAL模块打印出的 SVGA芯片 支持的显示模式号
+# 主要作用是显示视频图像芯片的查询信息,然后根据查询信息配置芯片的显示模式
+# 每次传入两个字节, 并分两次打印
+Label_DispAL:
+
+	push	ecx
+	push	edx
+	push	edi
+	
+	mov	edi,	[DisplayPosition] # DisplayPosition保存字符游标索引值(偏移值)
+	mov	ah,	0x0F # 保存字体颜色属性
+	mov	dl,	al # 为了先显示AL寄存器的高四位数据, 暂且先把AL寄存器的低四位数据’保存在DL寄存器
+	shr	al,	4 # al当前是原al高位的一个B
+	mov	ecx,	2 # loop循环两次
+.begin:
+
+	and	al,	0x0F
+	cmp	al,	9
+	ja	.1 # 大于
+	add	al,	'0' # 小于9+'0'正是al对应的16进制数的字符
+	jmp	.2
+.1:
+
+	sub	al,	0x0A # 大于9, (al-0x0A)+'A'正是al对应的16进制数的字符
+	add	al,	'A'
+.2:
+
+	mov	gs:[edi],	ax # 设定gs已在0xB800, 是一段专门用于显示字符的内存空间, 每个字符占2B, 低字节保存字符, 高字节保存字符的颜色属性
+	add	edi,	2 # 每次显示两个字符
+	
+	mov	al,	dl
+	loop	.begin
+
+	mov	[DisplayPosition],	edi # 保存偏移量
+
+	pop	edi
+	pop	edx
+	pop	ecx
+	
+	ret
+
 
 Read_Clusters:
 #
@@ -421,6 +618,7 @@ Read_Clusters:
 RootDirSizeForLoop:	.int	RootDirSectors # 剩余待查找的扇区数
 SectorNo:	.int	0
 PrintLine:	.word	0x0200
+DisplayPosition:		.int	0
 
 # =======	display messages
 DiskError:      .ascii "ERROR: Disk error!"
@@ -430,3 +628,14 @@ StartLoaderMessage:	.ascii	"Start Loader"
 OpenA20Message:	.ascii	"Open A20 Done"
 FindKernel: .ascii "FindKernel" # len=10
 CopyKernelDone: .ascii "Copy Kernel Done" # len=16
+StartGetMemStructMessage:	.ascii	"Start Get Memory Struct." # len=16
+GetMemStructErrMessage:	.ascii	"Get Memory Struct ERROR" # len=23
+GetMemStructOKMessage:	.ascii	"Get Memory Struct SUCCESSFUL!" # len=29
+
+StartGetSVGAVBEInfoMessage:	.ascii	"Start Get SVGA VBE Info" # len=23
+GetSVGAVBEInfoErrMessage:	.ascii	"Get SVGA VBE Info ERROR" # len=23
+GetSVGAVBEInfoOKMessage:	.ascii	"Get SVGA VBE Info SUCCESSFUL!" # len=29
+
+StartGetSVGAModeInfoMessage:	.ascii	"Start Get SVGA Mode Info" # len=24
+GetSVGAModeInfoErrMessage:	.ascii	"Get SVGA Mode Info ERROR" # len=24
+GetSVGAModeInfoOKMessage:	.ascii	"Get SVGA Mode Info SUCCESSFUL!" # len=30
