@@ -290,10 +290,7 @@ Read_Clusters:
     and ax, 0x0fff                              # Drop the last 4 bits of next cluster
         
   .nextClusterCalculated:
-    cmp ax, 0x0ff8                              # Are we at the end of the file?
-    jge .done
-
-	xchg cx,ax # cx 保存next cluster
+    xchg cx,ax # cx 保存next cluster
    	xor dx, dx
     xor bh, bh
 	mov bl, byte ptr [BPB_SecPerClus]            # and mul that by the sectors per cluster
@@ -303,13 +300,17 @@ Read_Clusters:
 
     clc # 清除CF位(进位标记)
     add di, cx                                 # Add to the pointer offset
-    jnc .clusterLoop # 没有进位, 进位则表示buffer要溢出了 
+    jnc .noNeedFixBuffer # 没有进位, 进位则表示buffer要溢出了
 
   .fixBuffer:                                   # An error will occur if the buffer in memory???
     mov dx, es                                  # overlaps a 64k page boundry, when di overflows
     add dh, 0x10                                # it will trigger the carry flag, so correct
     mov es, dx                                  # extra segment by 0x1000
 	# es+=(0x1000 << 4) = 64k, di溢出部分会被丢弃, 加上进位后的es,刚好相等
+
+  .noNeedFixBuffer:
+	cmp ax, 0x0ff8                              # Are we at the end of the file?
+    jge .done
 
     jmp .clusterLoop                            # Load the next file cluster
 
