@@ -153,12 +153,13 @@ Func_ReadSectors:
 	
 	call LBA2CHS
 
+	push di # di常用于地址偏移, 保存一下
 	mov	dl,	byte ptr [BS_DrvNum] # BS_DrvNum是当前中断0x13使用到的驱动器号
 	mov di, 0x5 # try times
 
 Label_Go_On_Reading:
 	mov	ah,	0x2 # INT 13h , AH=02h 功能:读取磁盘扇区
-	mov	al,	byte ptr [bp-2] # load读入的扇区个数
+	mov	al,	byte ptr [bp-2] # load读入的扇区个数, `push cx`由`mov sp, bp`处理
 	int	0x13
 	jnc	Label_Go_On_ReadingDone # 当运算产生进位标志时，即CF=1时，是失败需重试, 成功是`CF clear`
 
@@ -170,6 +171,7 @@ Label_Go_On_Reading:
 
 	jmp Desk_Err
 Label_Go_On_ReadingDone:
+	pop di
 	mov sp, bp
 	pop	bp
 	ret
