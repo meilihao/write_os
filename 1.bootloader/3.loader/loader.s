@@ -37,20 +37,6 @@ LABEL_DESC_DATA64:	.quad	0x0000920000000000
 
 .include "fat12.s"
 
-# 放到结尾不知为什么会导致symbol的地址与实际内存地址对不上, 而导致输出的字符错乱
-# =======	tmp variable
-RootDirSizeForLoop:	.int	RootDirSectors # 剩余待查找的扇区数
-SectorNo:	.int	0
-PrintLine:	.word	0x0200
-
-# =======	display messages
-DiskError:      .ascii "ERROR: Disk error!"
-NoKernelMessage: .ascii	"ERROR:No KERNEL Found"
-KernelFileName:	 .ascii	"KERNEL  BIN" # fat12会处理扩展名中的`.`
-StartLoaderMessage:	.ascii	"Start Loader"
-OpenA20Message:	.ascii	"Open A20 Done"
-FindKernel: .ascii "FindKernel" # len=10
-
 Label_Start:
 	mov	ax,	cs
 	mov	ds,	ax
@@ -182,12 +168,13 @@ Func_ReadSectors:
 	
 	call LBA2CHS
 
+	push di # di常用于地址偏移, 保存一下
 	mov	dl,	byte ptr [BS_DrvNum] # BS_DrvNum是当前中断0x13使用到的驱动器号
 	mov di, 0x5 # try times
 
 Label_Go_On_Reading:
 	mov	ah,	0x2 # INT 13h , AH=02h 功能:读取磁盘扇区
-	mov	al,	byte ptr [bp-2] # load读入的扇区个数
+	mov	al,	byte ptr [bp-2] # load读入的扇区个数, `push cx`由`mov sp, bp`处理
 	int	0x13
 	jnc	Label_Go_On_ReadingDone # 当运算产生进位标志时，即CF=1时，是失败需重试, 成功是`CF clear`
 
@@ -199,6 +186,7 @@ Label_Go_On_Reading:
 
 	jmp Desk_Err
 Label_Go_On_ReadingDone:
+	pop di
 	mov sp, bp
 	pop	bp
 	ret
@@ -207,7 +195,7 @@ Label_Go_On_ReadingDone:
 # 没找到loader.bin
 Label_No_KernelBin:
 	mov cx,21
-	lea bp, NoKernelMessage # NoKernelMessage在0x10000之上, bp溢出, 导致打印乱码
+	lea bp, NoKernelMessage # NoKernelMessage在0x10000之上, bp溢出, 导致打印乱码, 因此要设置es
 	call PrintError
 	jmp $
 
@@ -228,7 +216,6 @@ PrintInfo:
 	mov	ax,	ds
 	mov	es,	ax
 	pop ax
-
 	int	0x10
 
 	add dx, 0x0100
@@ -238,13 +225,21 @@ PrintInfo:
 	ret
 
 PrintError:
+	push dx
+
 	mov	ax,	0x1301
 	mov	bx,	0x008c
+	mov dx, [PrintLine]
 	push ax
 	mov	ax,	ds
 	mov	es,	ax
 	pop ax
 	int	0x10
+
+	add dx, 0x0100
+	mov [PrintLine], dx
+	pop dx
+
 	ret
 
 # =======	found loader.bin name in root director struct
@@ -267,12 +262,7 @@ Load_File:
 	# 设置[es:bx]指定loader.bin在内存中的起始位置
 	mov	ax,	BaseTmpOfKernelAddr
 	mov	es,	ax
-	mov	di,	OffsetTmpOfKernelFile	
-
-	mov cx,10
-	lea bp, FindKernel # NoKernelMessage在0x10000之上, bp溢出, 导致打印乱码
-	call PrintInfo
-	jmp $
+	mov	di,	OffsetTmpOfKernelFile
 	
 	pop ax # 取Load_FAT保存的有效簇号
 	call Read_Clusters
@@ -285,6 +275,7 @@ Load_File:
 	push	esi
 
 	# 计算读到的字节数
+	xor ecx, ecx
 	mov cx, es
 	shl ecx, 4
 	and edi, 0x0000FFFF
@@ -330,6 +321,10 @@ KillMotor: # 关闭软盘
 	mov	al,	0	
 	out	dx,	al # 通过io端口实现
 	pop	dx
+
+	mov cx,16
+	lea bp, CopyKernelDone
+	call PrintInfo
 
 	jmp $
 
@@ -394,10 +389,7 @@ Read_Clusters:
     and ax, 0x0fff                              # Drop the last 4 bits of next cluster
         
   .nextClusterCalculated:
-    cmp ax, 0x0ff8                              # Are we at the end of the file?
-    jge .done
-
-	xchg cx,ax # cx 保存next cluster
+    xchg cx,ax # cx 保存next cluster
    	xor dx, dx
     xor bh, bh
 	mov bl, byte ptr [BPB_SecPerClus]            # and mul that by the sectors per cluster
@@ -407,15 +399,34 @@ Read_Clusters:
 
     clc # 清除CF位(进位标记)
     add di, cx                                 # Add to the pointer offset
-    jnc .clusterLoop # 没有进位, 进位则表示buffer要溢出了 
+    jnc .noNeedFixBuffer # 没有进位, 进位则表示buffer要溢出了
 
   .fixBuffer:                                   # An error will occur if the buffer in memory???
     mov dx, es                                  # overlaps a 64k page boundry, when di overflows
     add dh, 0x10                                # it will trigger the carry flag, so correct
     mov es, dx                                  # extra segment by 0x1000
-	# es+=(0x1000 << 4) = 64k, di溢出部分会被丢弃, 加上进位后的es,刚好相等 
+	# es+=(0x1000 << 4) = 64k, di溢出部分会被丢弃, 加上进位后的es,刚好相等
+
+  .noNeedFixBuffer:
+	cmp ax, 0x0ff8                              # Are we at the end of the file?
+    jge .done
 
     jmp .clusterLoop                            # Load the next file cluster
 
   .done:
     ret
+
+# 放到结尾不知为什么会导致symbol的地址与实际内存地址对不上, 而导致输出的字符错乱
+# =======	tmp variable
+RootDirSizeForLoop:	.int	RootDirSectors # 剩余待查找的扇区数
+SectorNo:	.int	0
+PrintLine:	.word	0x0200
+
+# =======	display messages
+DiskError:      .ascii "ERROR: Disk error!"
+NoKernelMessage: .ascii	"ERROR:No KERNEL Found"
+KernelFileName:	 .ascii	"KERNEL  BIN" # fat12会处理扩展名中的`.`
+StartLoaderMessage:	.ascii	"Start Loader"
+OpenA20Message:	.ascii	"Open A20 Done"
+FindKernel: .ascii "FindKernel" # len=10
+CopyKernelDone: .ascii "Copy Kernel Done" # len=16
