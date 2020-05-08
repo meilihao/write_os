@@ -145,6 +145,8 @@ LBA2CHS:
 	mov ch, al # 柱面数
 	ret
 
+
+# 由上层根据需要自行处理偏移量
 Func_ReadSectors:
 	push	bp
 	mov	bp,	sp
