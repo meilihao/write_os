@@ -149,7 +149,9 @@ $ bochs -f bochsrx.txt # 使用指定配置启动模拟器(**其工具栏打`X`�
 <bochs:10> u 0x7c00 0x7e00 # 反汇编mbr所在内存
 ```
 
-> bochs 2.6.11 的bios,vgabios要单独安装否则会报`couldn't open ROM image file '/usr/share/bochs/${BIOS-bochs|VGABIOS-lgpl}-latest'`, bochs 2.6则不需要.
+> **bochs 2.6.11 的bios,vgabios要单独安装**否则会报`couldn't open ROM image file '/usr/share/bochs/${BIOS-bochs|VGABIOS-lgpl}-latest'`, bochs 2.6则不需要.
+
+> **bochs 2.6.11支持用上下键选择历史命令**, 而v2.6不支持.
 
 bochs控制台命令:
 - h : 查看命令的help
