@@ -14,3 +14,4 @@
 - [一个UEFI引导程序的实现](https://www.ituring.com.cn/book/2763)
 
 ### 操作系统真象还原
+- [《操作系统真象还原》源码及学习笔记（os-elephant）还原真相](https://github.com/yifengyou/os-elephant)
