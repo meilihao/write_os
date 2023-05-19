@@ -8,16 +8,18 @@
 1. 让qemu从软盘启动: `qemu-system-x86_64 -fda floppy.img`
 
 ## qemu调试boot.bin
-1. `qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`, 此时`telnet 127.0.0.1 4444`还可连接qemu monitor(quit可退出monitor, 此时qemu-system-x86_64也会退出).
+1. ~~`qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`, 此时`telnet 127.0.0.1 4444`还可连接qemu monitor(quit可退出monitor, 此时qemu-system-x86_64也会退出).~~ qemu-system-x86_64反汇编内存中的mbr有问题, 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误, qemu-system-i386可解决.
+1. `qemu-system-i386 -hda boot.img -S -s -monitor tcp::4444,server,nowait`
 1. 启动gdb
 
     1. 输入`gdb -q`
     1. 连接gdb server: `target remote :1234`
-    1. 设置被调试环境架构: `set architecture i386:x86-64:intel`, 可直接输入`set architecture`查询可得
-    1. 查看cpu初始的寄存器状态: `info reg`
+    1. ~~设置被调试环境架构: `set architecture i386:x86-64:intel`, 可直接输入`set architecture`查询可得~~, 使用qemu-system-i386无需这步, 而且qemu-system-x86_64设置arch还是会反编译错误.
+    1. 查看cpu初始的寄存器状态: `info reg`=`i r`
+    1. 查看单个寄存器: `p $cs`, 以16进制查看`p /x $cs`
     1. 显示将要执行的汇编指令地址: `display /5i $cs * 0x10 + $pc`
     1. 打断点调试: `b *0x7c00`, `*addr`表示在该地址设置断点
-    1. 反汇编: `disassemble 0x7c00,0x7e00` # 有问题, 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误, 因此暂时使用bochs调试boot.
+    1. 反汇编: `disassemble 0x7c00,0x7e00`
 
         ```asm
         (gdb) set disassembly-flavor intel
@@ -94,6 +96,8 @@ gdb执行`target remote :1234`时报错, 且`info reg`读到的qemu寄存器与q
 参考:
 - [qemu 2.0与gdb连接调试内核时出现"Remote 'g' packet reply is too long"问题分析](https://bbs.pediy.com/thread-255296.htm)
 - [qemu+gdb调试内核出现remote ‘g’ packet reply is too long](http://www.mamicode.com/info-detail-2862637.html)
+
+**试了qemu-system-i386 v6.2.0+ubuntu 22.04, gdb反编译正常**
 
 qemu与gdb协商的arch结果是`i386:x86-64(32 bit)`, 而当前代码运行在实模式下(`16 bit`), 因此反汇编的结果会出错, 可参考[这里](https://stackoverflow.com/questions/32955887/how-to-disassemble-16-bit-x86-boot-sector-code-in-gdb-with-x-i-pc-it-gets-tr).
 
