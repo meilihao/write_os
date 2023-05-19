@@ -8,7 +8,7 @@
 1. 让qemu从软盘启动: `qemu-system-x86_64 -fda floppy.img`
 
 ## qemu调试boot.bin
-1. `qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`
+1. `qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`, 此时`telnet 127.0.0.1 4444`还可连接qemu monitor(quit可退出monitor, 此时qemu-system-x86_64也会退出).
 1. 启动gdb
 
     1. 输入`gdb -q`
@@ -107,7 +107,7 @@ Architecture `i8086' not recognized. # 这句是关键
 The target architecture is set automatically (currently i386:x86-64)
 ```
 
-`qemu-system-i386`可以`set arch i8086`, 但反汇编还算错误.
+`qemu-system-i386`可以`set arch i8086`, 但反汇编还是错误.
 
 其他尝试, 先执行`set arch i8086`, 再执行`target remote`会碰到`Remote 'g' packet reply is too long`.
 
@@ -126,6 +126,9 @@ The target architecture is set automatically (currently i386:x86-64)
 
     - qemu: QEMU emulator version 4.2.0 (Debian 1:4.2-3ubuntu6)
     - gdb: GNU gdb (Ubuntu 9.1-0ubuntu1) 9.1
+1. ubuntu 22.04
+    - qemu: QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.8)
+    - gdb: GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 
 都存在同样的问题, 暂无法解决. 因此推荐使用bochs调试boot.
 
@@ -133,7 +136,7 @@ The target architecture is set automatically (currently i386:x86-64)
 ```
 Note that other tutorials also add a “-S” parameter so QEMU starts the kernel stopped, however this is ommitted deliberately. The “-S” parameter would allow gdb to set an initial breakpoint anywhere in the kernel before kernel execution begins. Unfortunately, a change made to the gdbserver in QEMU, to support debugging 32- and 16-bit guest code in an x86_64 session breaks the -S functionality. The symptoms are that gdb prints out “Remote ‘g’ packet reply is too long:”, and fails to interact successfully with QEMU. The suggested fix is to run the QEMU until it is in 64-bit code (i.e. after the boot loader has finished and the kernel started) before connecting from gdb (omitting the -S parameter). To debug a running kernel, this is sufficient; it is the method we will take.
 
-# 简单翻译: 对QEMU中的gdbserver进行的更改（以支持在x86_64会话中调试32位和16位guest代码）破坏了-S功能, 因此用gdb调试16-bit就是无解了, 还是乖乖使用bochs.
+# 简单翻译: 对QEMU中的gdbserver进行的更改（以支持在x86_64会话中调试32位和16位guest代码）破坏了-S功能, 因此用gdb调试16-bit就是无解了, 还是乖乖使用bochs, 等内核启动了再用gdb调试.
 ```
 
 ## bochs
@@ -141,6 +144,7 @@ Note that other tutorials also add a “-S” parameter so QEMU starts the kerne
 
 参考:
 - [用bochs调试自己写的系统引导代码](用bochs调试自己写的系统引导代码)
+- [Using the command line debugger](https://bochs.sourceforge.io/doc/docbook/user/internal-debugger.html)
 
 ```
 $ sudo apt install bochs bochs-x bochsbios vgabios # bochs-x要安装，否则启动模拟器时会报错: `>>PANIC<< dlopen failed for module 'x': file not found`，因为没有xwindows组件，无法显示图像
@@ -163,15 +167,56 @@ bochs控制台命令:
 - info : 查看信息
 
     - cpu : cpu的寄存器
-    - r/reg/regs/registers : 列表显示CPU寄存器及其内容
-    - sreg : 列出CPU全部状态信息，包括各个段选择子（cs，ds等）以及ldtr和gdtr等
-    - creg : 列出所有的CR0-CR4寄存器
     - tab : 页表
     - gdt
     - symbols
+- r/reg/regs/registers : 列表显示CPU寄存器及其内容
+- sreg : 列出CPU全部状态信息，包括各个段选择子（cs，ds等）以及ldtr和gdtr等
+- creg : 列出所有的CR0-CR4寄存器
 - xp /nuf addr : 查看内存物理地址内容 	xp /10bx 0x100000
 - x /nuf addr :	查看线性地址内容 	x /40wd 0x90000; x /10bx ds:0x1a
 - u start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令
 - print-stack : 显示当前堆栈的内容
 
 > `/nuf`类似于gdb中的格式: n 为显示的单元个数； u 为显示单元的大小（b：Byte、h：Word、w：DWord、g：QWrod（四字节））； f 为显示的格式（x：十六进制、d：十进制、t：二进制、c：字符）
+
+## qemu
+### 启动过程
+`qemu-system-x86_64 -S -fda floppy.img`
+
+按Ctrl-Alt-2进入qemu monitor(Ctrl-Alt-1, 切回qemu screen):
+```bash
+> info registers
+(qemu) info registers
+EAX=00000000 EBX=00000000 ECX=00000000 EDX=00060fb1
+ESI=00000000 EDI=00000000 EBP=00000000 ESP=00000000
+EIP=0000fff0 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=0
+ES =0000 00000000 0000ffff 00009300
+CS =f000 ffff0000 0000ffff 00009b00 # 实模式cs位宽是2B, 就是f000
+SS =0000 00000000 0000ffff 00009300
+DS =0000 00000000 0000ffff 00009300
+FS =0000 00000000 0000ffff 00009300
+GS =0000 00000000 0000ffff 00009300
+LDT=0000 00000000 0000ffff 00008200
+TR =0000 00000000 0000ffff 00008b00
+GDT=     00000000 0000ffff
+IDT=     00000000 0000ffff
+CR0=60000010 CR2=00000000 CR3=00000000 CR4=00000000
+DR0=0000000000000000 DR1=0000000000000000 DR2=0000000000000000 DR3=0000000000000000 
+DR6=00000000ffff0ff0 DR7=0000000000000400
+EFER=0000000000000000
+FCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80
+FPR0=0000000000000000 0000 FPR1=0000000000000000 0000
+FPR2=0000000000000000 0000 FPR3=0000000000000000 0000
+FPR4=0000000000000000 0000 FPR5=0000000000000000 0000
+FPR6=0000000000000000 0000 FPR7=0000000000000000 0000
+XMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000
+XMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000
+XMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000
+XMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000
+(qemu) xp/1i 0xffff0 # 打印0xffff0处的指令. i,格式是指令
+0x00000000000ffff0:  ljmp   $0xf000,$0xe05b
+(qemu) c # 继续执行
+```
+
+0xf000<<4+0xfff0=0xffff0
