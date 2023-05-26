@@ -9,7 +9,7 @@
 
 ## qemu调试boot.bin
 1. ~~`qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`, 此时`telnet 127.0.0.1 4444`还可连接qemu monitor(quit可退出monitor, 此时qemu-system-x86_64也会退出).~~ qemu-system-x86_64反汇编内存中的mbr有问题, 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误, qemu-system-i386可解决.
-1. `qemu-system-i386 -hda boot.img -S -s -monitor tcp::4444,server,nowait`
+1. `qemu-system-i386 -hda boot.img -S -s -monitor tcp::4444,server,nowait`, 实践发现`disassemble 0x7c00,0x7e00`还是错误, 看来只能用bochs了
 1. 启动gdb
 
     1. 输入`gdb -q`
@@ -181,6 +181,8 @@ bochs控制台命令:
 - x /nuf addr :	查看线性地址内容 	x /40wd 0x90000; x /10bx ds:0x1a
 - u start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令
 - print-stack : 显示当前堆栈的内容
+- show int: 每次有中断时就提示. 同时显示三种中断类型`softint, extint, iret`, 也可单独显示某类中断, 如执行 show softint 只显示软件主动触发的中断, show extint 则只显示来自
+外部设备的中断, show iret 只显示 iretd 指令有关的信息
 
 > `/nuf`类似于gdb中的格式: n 为显示的单元个数； u 为显示单元的大小（b：Byte、h：Word、w：DWord、g：QWrod（四字节））； f 为显示的格式（x：十六进制、d：十进制、t：二进制、c：字符）
 
