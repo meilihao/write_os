@@ -161,28 +161,59 @@ $ bochs -f bochsrx.txt # 使用指定配置启动模拟器(**其工具栏打`X`�
 
 > **bochs 2.6.11支持用上下键选择历史命令和修改命令的任意部分内容**, 而v2.6不支持.
 
+> 大体上bochs的调试命令分为“Debugger control”类、“Execution control”类、“Breakpoint management”
+类、“CPU and memory contents”类
+
 bochs控制台命令:
 - h : 查看命令的help
 - c : 继续执行, 直到遇到断点. bochs刚启动只完成了硬件平台的初始化(与`qemu -S`的效果相同)后就停止了, 必须手动继续执行
 - exit : 退出模拟, bochs打开的模拟器窗口无法直接关闭, 必须要通过控制台退出
-- b address :	在某物理地址上设置断点, 比如`b 0x7c00`
+- b address :	给物理地址上设置断点, 比如`b 0x7c00`
+- vb address : 给虚拟地址设置断点
+- lb address: 给线性地址设置断点
+- blist: 显示所有断点信息
+- bpd/bpe <n>: 禁用/启用断点, n为断点号 from blist.
+- d <n>: 删除断点
 - s 	: 单步执行
 - dump_cpu : 显示CPU中的所有寄存器和状态值
 - info : 查看信息
 
     - cpu : cpu的寄存器
-    - tab : 页表
-    - gdt
+    - tab : 显示页表中线性地址到物理地址的映射
+    - gdt [num]: 显示全局描述符表 GDT, 如果加了 num, 则只显示 gdt 中第 num 项描述符
+    - ldt
+    - idt
     - symbols
+    - fpu
+    - tss
+    - ivt [num]: 显示中断向量表IVT. 和 gdt 一样, 如果指定了 num, 则只会显示第 num 项的中断向量
+- page line_addr: 显示线性地址到物理地址间的映射
 - r/reg/regs/registers : 列表显示CPU寄存器及其内容
 - sreg : 列出CPU全部状态信息，包括各个段选择子（cs，ds等）以及ldtr和gdtr等
 - creg : 列出所有的CR0-CR4寄存器
+- dreg: 显示所有调试寄存器的值
 - xp /nuf addr : 查看内存物理地址内容 	xp /10bx 0x100000
-- x /nuf addr :	查看线性地址内容 	x /40wd 0x90000; x /10bx ds:0x1a
-- u start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令
+- x /nuf addr :	查看线性地址内容 	x /40wd 0x90000; x /10bx ds:0x1a; x gs:ax
+- u [/num] start end : 反汇编一段内存 	u 0x100000 0x100010; `u /10`, 反汇编从当前地址开始的10条指令
 - print-stack : 显示当前堆栈的内容
+- show
+    - mode: 模式
+    - int: 中断
+    - call
+- set: 设置寄存器状态
+- trace on: 每执行一条指令, 会输出其反汇编, 特别适合单步调试
+- sb [delta] : delta 表示增量，意味再执行 delta 条指令程序就中断
+- sba ［time] : CPU 从运行开始, 执行第 time 条指令时中断, 从 0 开始的指令数. bochs控制台按`c`后输出log的第一项就是指令数
+- watch 
 
-> `/nuf`类似于gdb中的格式: n 为显示的单元个数； u 为显示单元的大小（b：Byte、h：Word、w：DWord、g：QWrod（四字节））； f 为显示的格式（x：十六进制、d：十进制、t：二进制、c：字符）
+    - r phy_addr: 设置读断点, 如果物理地址 phy_addr 有读操作则停止运行
+    - w phy_addr: 设置写断点，如果物理地址 phy_addr 有写操作则停止运行. 如果某块内存不知何时被改写了, 可以设置此中断
+- setpmem <phy_addr> <szie> <val>: 设置以物理内存 phy addr 为起始, 连续 size 个字节的内容为 val. 此命令非常
+有用，在某些情况下不易调试时，可以在程序中通过某个地址的值来判断分支，需要用 setpmem 来配合. size最大是4
+- ptime: 显示 Bochs 自启动之后，总执行指令数
+- print-stack [num]: 显示堆栈, num默认是16, 表示打印的栈条目数. 输出的栈内容是栈顶在上，低地址在上, 高地址在下
+
+> `/nuf`类似于gdb中的格式: n 为显示的单元个数； u 为显示单元的大小（b：Byte、h：Word、w：DWord、g：QWrod（四字节））； f 为显示的格式（x：十六进制、d：十进制、u:无符号十进制;o, 八进制; t：二进制、c：字符, s: ascii; i: instr即指令）
 
 ## qemu
 ### 启动过程

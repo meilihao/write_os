@@ -17,8 +17,9 @@
 	- [《操作系统真象还原》源码及学习笔记（os-elephant）还原真相](https://github.com/yifengyou/os-elephant)
 	- [操作系统真象还原 学习笔记19--总结&感悟](https://www.kn0sky.com/?p=60)
 
--  30天自制操作系统
--  Orange's 一个操作系统的实现
+- 30天自制操作系统
+- Orange's 一个操作系统的实现
+- x86/x64体系探索及编程
 
 ## ref
 - [x86汇编语言](https://www.jianshu.com/p/7f63e62e0ffd)
