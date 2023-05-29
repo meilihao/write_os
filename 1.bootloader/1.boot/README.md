@@ -9,7 +9,7 @@
 
 ## qemu调试boot.bin
 1. ~~`qemu-system-x86_64 -fda floppy.img -S -s -monitor tcp::4444,server,nowait -M q35 -cpu Skylake-Client-v1`, 此时`telnet 127.0.0.1 4444`还可连接qemu monitor(quit可退出monitor, 此时qemu-system-x86_64也会退出).~~ qemu-system-x86_64反汇编内存中的mbr有问题, 参考FAQ#qemu-system-x86_64+gdb `disassemble 0x7c00,0x7e00`的结果错误, qemu-system-i386可解决.
-1. `qemu-system-i386 -hda boot.img -S -s -monitor tcp::4444,server,nowait`
+1. `qemu-system-i386 -hda boot.img -S -s -monitor tcp::4444,server,nowait`, 实践发现`disassemble 0x7c00,0x7e00`还是错误, 看来只能用bochs了
 1. 启动gdb
 
     1. 输入`gdb -q`
@@ -199,12 +199,14 @@ bochs控制台命令:
 - show
     - mode: 模式
     - int: 中断
+
+        每次有中断时就提示. 同时显示三种中断类型`softint, extint, iret`, 也可单独显示某类中断, 如执行 show softint 只显示软件主动触发的中断, show extint 则只显示来自外部设备的中断, show iret 只显示 iretd 指令有关的信息
     - call
 - set: 设置寄存器状态
 - trace on: 每执行一条指令, 会输出其反汇编, 特别适合单步调试
 - sb [delta] : delta 表示增量，意味再执行 delta 条指令程序就中断
 - sba ［time] : CPU 从运行开始, 执行第 time 条指令时中断, 从 0 开始的指令数. bochs控制台按`c`后输出log的第一项就是指令数
-- watch 
+- watch
 
     - r phy_addr: 设置读断点, 如果物理地址 phy_addr 有读操作则停止运行
     - w phy_addr: 设置写断点，如果物理地址 phy_addr 有写操作则停止运行. 如果某块内存不知何时被改写了, 可以设置此中断
