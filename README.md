@@ -5,6 +5,8 @@
 1. 理解os
 1. just for fun!
 
+模拟器选择qemu, 兼容性更好, 更容易发现问题, 调试可针对场景bochs/qemu一起上.
+
 ## books
 - <<一个64位操作系统的设计与实现>>
 	- [code](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
