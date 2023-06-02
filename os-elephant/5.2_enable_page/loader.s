@@ -89,7 +89,7 @@ p_mode_start:
    mov ax, SELECTOR_VIDEO
    mov gs, ax
 
-   mov byte [gs:320], 'P' ; 320, 错开其他打印信息
+   mov byte [gs:320], 'P' ; 错开其他打印信息. 320/(80*2, 每个字符占2B) = 2, 即第三行
 
    ; 创建页目录及页表并初始化页内存位图
    call setup_page
@@ -119,13 +119,13 @@ p_mode_start:
    ;在开启分页后,用gdt新的地址重新加载
    lgdt [gdt_ptr]             ; 重新加载
 
-   mov byte [gs:160], 'V'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:162], 'i'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:164], 'r'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:166], 't'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:168], 'u'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:170], 'a'     ;视频段段基址已经被更新,用字符v表示virtual addr
-   mov byte [gs:172], 'l'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:480], 'V'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:482], 'i'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:484], 'r'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:486], 't'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:488], 'u'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:490], 'a'     ;视频段段基址已经被更新,用字符v表示virtual addr
+   mov byte [gs:492], 'l'     ;视频段段基址已经被更新,用字符v表示virtual addr
 
    jmp $
 
@@ -142,7 +142,7 @@ setup_page:
 ;开始创建页目录项(PDE)
 .create_pde:				     ; 创建Page Directory Entry
    mov eax, PAGE_DIR_TABLE_POS
-   add eax, 0x1000 			     ; 此时eax为第一个页表的位置及属性
+   add eax, 0x1000 			     ; 此时eax为第一个页表的位置及属性, 0x1000=4096, eax=0x101000
    mov ebx, eax				     ; 此处为ebx赋值，是为.create_pte做准备，ebx为基址。
 
 ;   下面将页目录项0和0xc00都存为第一个页表的地址，
@@ -151,7 +151,8 @@ setup_page:
    or eax, PG_US_U | PG_RW_W | PG_P	     ; 页目录项的属性RW和P位为1,US为1,表示用户属性,所有特权级别都可以访问.
    mov [PAGE_DIR_TABLE_POS + 0x0], eax       ; 第1个目录项,在页目录表中的第1个目录项写入第一个页表的位置(0x101000)及属性(7)
    mov [PAGE_DIR_TABLE_POS + 0xc00], eax     ; 一个页表项占用4字节,0xc00表示第768个页表占用的目录项,0xc00以上的目录项用于内核空间,
-					     ; 也就是页表的0xc0000000~0xffffffff共计1G属于内核,0x0~0xbfffffff共计3G属于用户进程.
+					     ; 也就是页表的0xc0000000~0xffffffff共计1G属于内核,0x0~0xbfffffff共计3G属于用户进程. 用户占3/4页表项, 因此开始位置=(1024*3/4)*4=3072=0xc00
+                    ; 0~0xc00是用户空间页表项的起始地址, 将来指向的物理地址范围是 0~0xfffff, 只是 1MB 的空间, 其余 3MB 并未分配
    sub eax, 0x1000
    mov [PAGE_DIR_TABLE_POS + 4092], eax	     ; 使最后一个目录项指向页目录表自己的地址
 
