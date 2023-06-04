@@ -97,11 +97,13 @@ p_mode_start:
 ;要将描述符表地址及偏移量写入内存gdt_ptr,一会用新地址重新加载
    sgdt [gdt_ptr]	      ; 存储到原来gdt所有的位置
 
+   ; 打印功能将来也是在内核中实现, 肯定不能让用户进程直接能控制显存. 故显存段的段基址也要改为 3GB 以上才行
    ;将gdt描述符中视频段描述符中的段基址+0xc0000000
-   mov ebx, [gdt_ptr + 2]  
+   mov ebx, [gdt_ptr + 2]  ; 得到gdt的首地址
    or dword [ebx + 0x18 + 4], 0xc0000000      ;视频段是第3个段描述符,每个描述符是8字节,故0x18。
 					      ;段描述符的高4字节的最高位是段基址的31~24位
 
+   ; 修改 GDT 基址
    ;将gdt的基址加上0xc0000000使其成为内核所在的高地址
    add dword [gdt_ptr + 2], 0xc0000000
 
@@ -118,6 +120,7 @@ p_mode_start:
 
    ;在开启分页后,用gdt新的地址重新加载
    lgdt [gdt_ptr]             ; 重新加载
+   ; 无需更新SELECTOR_VIDEO, 因为它保持的是相对gdt的索引
 
    mov byte [gs:480], 'V'     ;视频段段基址已经被更新,用字符v表示virtual addr
    mov byte [gs:482], 'i'     ;视频段段基址已经被更新,用字符v表示virtual addr
@@ -142,19 +145,22 @@ setup_page:
 ;开始创建页目录项(PDE)
 .create_pde:				     ; 创建Page Directory Entry
    mov eax, PAGE_DIR_TABLE_POS
-   add eax, 0x1000 			     ; 此时eax为第一个页表的位置及属性, 0x1000=4096, eax=0x101000
+   add eax, 0x1000 			     ; 此时eax为第一个页表的位置及属性(后3B), 0x1000=4096, eax=0x101000
    mov ebx, eax				     ; 此处为ebx赋值，是为.create_pte做准备，ebx为基址。
 
 ;   下面将页目录项0和0xc00都存为第一个页表的地址，
-;   一个页表可表示4MB内存,这样0xc03fffff以下的地址和0x003fffff以下的地址都指向相同的页表，
+;   一个页表可表示4MB内存,这样0xc0000000~0xc03fffff和0~0x003fffff的虚拟地址都指向相同的页表
 ;   这是为将地址映射为内核地址做准备
+;   kernel(计划70k以内)准备放在低端1MB内
    or eax, PG_US_U | PG_RW_W | PG_P	     ; 页目录项的属性RW和P位为1,US为1,表示用户属性,所有特权级别都可以访问.
+                                         ; 使用PG_US_U原因: 将来的init需要访问内核
    mov [PAGE_DIR_TABLE_POS + 0x0], eax       ; 第1个目录项,在页目录表中的第1个目录项写入第一个页表的位置(0x101000)及属性(7)
    mov [PAGE_DIR_TABLE_POS + 0xc00], eax     ; 一个页表项占用4字节,0xc00表示第768个页表占用的目录项,0xc00以上的目录项用于内核空间,
-					     ; 也就是页表的0xc0000000~0xffffffff共计1G属于内核,0x0~0xbfffffff共计3G属于用户进程. 用户占3/4页表项, 因此开始位置=(1024*3/4)*4=3072=0xc00
-                    ; 0~0xc00是用户空间页表项的起始地址, 将来指向的物理地址范围是 0~0xfffff, 只是 1MB 的空间, 其余 3MB 并未分配
+					     ; 也就是页表的0xc0000000~0xffffffff共计1G属于内核,0x0~0xbfffffff共计3G属于用户进程. 用户占3/4页表项, 因此内核目录项开始位置=(1024*3/4)*4=3072=0xc00
+                    ; (0,0xc00)是用户空间页表项的偏移范围, 
+                    ; 0和0xc00都指向第一个页表(0~0x3fffff, 包含1MB)原因: 当前loader在1MB内运行, 必须保证之前段机制下的线性地址和分页后的虚拟地址对应的物理地址一致. kernel将来指向的物理地址范围是低端4M, 只是只用了 1MB 的空间, 其余 3MB 并未使用
    sub eax, 0x1000
-   mov [PAGE_DIR_TABLE_POS + 4092], eax	     ; 使最后一个目录项指向页目录表自己的地址
+   mov [PAGE_DIR_TABLE_POS + 4092], eax	     ; 使最后一个目录项指向页目录表自己的首地址. eax=Ox100007
 
 ;下面创建页表项(PTE)
    mov ecx, 256				     ; 1M低端内存 / 每页大小4k = 256
@@ -162,16 +168,19 @@ setup_page:
    mov edx, PG_US_U | PG_RW_W | PG_P	     ; 属性为7,US=1,RW=1,P=1
 .create_pte:				     ; 创建Page Table Entry
    mov [ebx+esi*4],edx			     ; 此时的ebx已经在上面通过eax赋值为0x101000,也就是第一个页表的地址 
-   add edx,4096      ; edx
+   add edx,4096      ; 每页4k
    inc esi
    loop .create_pte
 
-;创建内核其它页表的PDE
+; 创建内核其它页表的PDE
+; 为了真正实现内核被所有进程共享, 还是在页目录表中为内核额外安装了 254个页表的 PDE （第 255 PDE 已经指向了页目录表本身）, 也就是内核空间的实际大小是 4GB 减去 4MB
+; 将来要完成的任务是让每个用户进程都有独立的页表，也就是独立的虚拟 4GB 空间, 其中低 3GB 属于用户进程自己的空间, 高 1GB 是内核空间，内核将被所有用户进程共享. 为了实现所有用户进程共享内核, 各用户进程的高 1GB 必须“都”指向内核所在的物理内存空间
+; 进程陷入内核时，假设内核为了某些需求为内核空间新增页表（通常是申请大量内存），因此还需要把新内核页表同步到其他进程的页表中，否则内核无法被“完全”共享，只能是“部分”共享。所以，实现内核完全共享最简单的办法是提前把内核的所有页目录项定下来，也就是提前把内核的页表固定下来，这是实现内核共享的关键
    mov eax, PAGE_DIR_TABLE_POS
    add eax, 0x2000 		     ; 此时eax为第二个页表的位置
    or eax, PG_US_U | PG_RW_W | PG_P  ; 页目录项的属性US,RW和P位都为1
    mov ebx, PAGE_DIR_TABLE_POS
-   mov ecx, 254			     ; 范围为第769~1022的所有目录项数量
+   mov ecx, 254			     ; 范围为第769~1022的所有目录项数量, 1023已指向页目录表自己的首地址
    mov esi, 769
 .create_kernel_pde:
    mov [ebx+esi*4], eax
