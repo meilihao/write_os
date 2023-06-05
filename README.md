@@ -33,3 +33,6 @@
 	- [12 Years of ToaruOS](https://gist.github.com/klange/f427a551af5f2f8b3c9ef80687883fcf)
 - [Google KataOS]()
 - [自制操作系统日记](https://developer.aliyun.com/article/1080227)
+
+## uefi
+- [UEFI BootLoader for ToyOS.](https://github.com/tanyugang/UEFI)
