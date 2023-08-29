@@ -22,6 +22,7 @@
 - 30天自制操作系统
 - Orange's 一个操作系统的实现
 - x86/x64体系探索及编程
+- [从零开始写 OS 内核](https://segmentfault.com/a/1190000040124650)
 
 ## ref
 - [x86汇编语言](https://www.jianshu.com/p/7f63e62e0ffd)
