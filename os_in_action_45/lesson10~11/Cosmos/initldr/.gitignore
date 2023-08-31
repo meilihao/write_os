@@ -1,0 +1,5 @@
+build/*.eki
+build/*.bin
+build/*.elf
+build/*.map
+build/lmoskrlimg
