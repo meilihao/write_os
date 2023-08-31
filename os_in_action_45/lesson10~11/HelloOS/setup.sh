@@ -4,7 +4,8 @@ mkdir -p root
 mount /dev/nbd0p2 root # as /
 mkdir -p root/boot
 mount /dev/nbd0p1 root/boot # as /boot
-cp ../Cosmos/initldr/build/Cosmos.eki root/boot
+# cp ../Cosmos/initldr/build/Cosmos.eki root/boot # 见../README.md FAQ的`INITKRL DIE ERROR：not find file`
+cp ../../lesson13/Cosmos/release/Cosmos.eki root/boot
 rm -rf root/boot/HelloOS.bin
 rm -rf root/boot/grub/grub.cfg
 cat > root/boot/grub/grub.cfg << "EOF"

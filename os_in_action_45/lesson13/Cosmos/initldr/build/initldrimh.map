@@ -1,0 +1,137 @@
+
+舍弃的输入节
+
+ .group         0x0000000000000000        0x8 inithead.o
+ .group         0x0000000000000000        0x8 inithead.o
+ .group         0x0000000000000000        0x8 vgastr.o
+ .group         0x0000000000000000        0x8 vgastr.o
+
+内存配置
+
+名称           来源             长度             属性
+*default*        0x0000000000000000 0xffffffffffffffff
+
+链结器命令稿和内存映射
+
+                0x0000000004000000                . = 0x4000000
+                0x0000000004000000                __start_ldr = .
+                0x0000000004000000                __begin_start_text = .
+
+.start.text
+ *(.start.text)
+                0x0000000004000000                __end_start_text = .
+                0x0000000004090000                //. = (0x90000 + .)
+                0x0000000004000000                __begin_text = .
+
+.text           0x0000000004000000      0x579
+ *(.text)
+ .text          0x0000000004000000       0xd8 imginithead.o
+                0x0000000004000000                _start
+ .text          0x00000000040000d8      0x229 inithead.o
+                0x000000000400011a                error
+                0x000000000400013e                strcmpl
+                0x0000000004000160                find_file
+                0x000000000400023c                write_realintsvefile
+                0x0000000004000286                write_ldrkrlfile
+                0x00000000040002d0                inithead_entry
+ .text          0x0000000004000301      0x278 vgastr.o
+                0x0000000004000301                init_curs
+                0x0000000004000334                numberk
+                0x000000000400039f                set_curs
+                0x00000000040003be                put_one_char
+                0x00000000040003d5                close_curs
+                0x00000000040003e6                clear_screen
+                0x0000000004000416                GxH_strwrite
+                0x00000000040004b7                strcopy
+                0x00000000040004d1                vsprintfk
+                0x0000000004000537                kprint
+                0x0000000004000579                __end_text = .
+                0x0000000004000579                __begin_data = .
+
+.iplt           0x0000000004000579        0x0
+ .iplt          0x0000000004000579        0x0 imginithead.o
+
+.text.__x86.get_pc_thunk.bx
+                0x0000000004000579        0x4
+ .text.__x86.get_pc_thunk.bx
+                0x0000000004000579        0x4 inithead.o
+                0x0000000004000579                __x86.get_pc_thunk.bx
+
+.text.__x86.get_pc_thunk.bp
+                0x000000000400057d        0x4
+ .text.__x86.get_pc_thunk.bp
+                0x000000000400057d        0x4 inithead.o
+                0x000000000400057d                __x86.get_pc_thunk.bp
+
+.text.__x86.get_pc_thunk.ax
+                0x0000000004000581        0x4
+ .text.__x86.get_pc_thunk.ax
+                0x0000000004000581        0x4 vgastr.o
+                0x0000000004000581                __x86.get_pc_thunk.ax
+
+.text.__x86.get_pc_thunk.si
+                0x0000000004000585        0x4
+ .text.__x86.get_pc_thunk.si
+                0x0000000004000585        0x4 vgastr.o
+                0x0000000004000585                __x86.get_pc_thunk.si
+
+.data           0x000000000400058c       0x14
+ *(.data)
+ .data          0x000000000400058c        0x0 inithead.o
+ .data          0x000000000400058c       0x14 vgastr.o
+                0x000000000400058c                curs
+                0x00000000040005a0                __end_data = .
+                0x00000000040005a0                __begin_rodata = .
+
+.got            0x00000000040005a0        0x0
+ .got           0x00000000040005a0        0x0 imginithead.o
+
+.got.plt        0x00000000040005a0        0xc
+ .got.plt       0x00000000040005a0        0xc imginithead.o
+                0x00000000040005a0                _GLOBAL_OFFSET_TABLE_
+
+.igot.plt       0x00000000040005ac        0x0
+ .igot.plt      0x00000000040005ac        0x0 imginithead.o
+
+.rodata         0x00000000040005ac       0x6f
+ *(.rodata)
+ *(.rodata.*)
+ .rodata.str1.1
+                0x00000000040005ac       0x5e inithead.o
+                                         0x7c (松开之前的大小)
+ .rodata.str1.1
+                0x000000000400060a       0x11 vgastr.o
+                0x000000000400061b                __end_rodata = .
+                0x000000000400061b                __begin_kstrtab = .
+
+.eh_frame       0x000000000400061c      0x330
+ .eh_frame      0x000000000400061c      0x180 inithead.o
+ .eh_frame      0x000000000400079c      0x1b0 vgastr.o
+                                        0x1c8 (松开之前的大小)
+
+.rel.dyn        0x000000000400094c        0x0
+ .rel.got       0x000000000400094c        0x0 imginithead.o
+ .rel.iplt      0x000000000400094c        0x0 imginithead.o
+
+.kstrtab
+ *(.kstrtab)
+                0x000000000400094c                __end_kstrtab = .
+                0x000000000400094c                __begin_bss = .
+
+.bss            0x000000000400094c        0x0
+ *(.bss)
+ .bss           0x000000000400094c        0x0 inithead.o
+ .bss           0x000000000400094c        0x0 vgastr.o
+                0x000000000400094c                __end_bss = .
+                0x000000000400094c                __end_ldr = .
+LOAD imginithead.o
+LOAD inithead.o
+LOAD vgastr.o
+OUTPUT(initldrimh.elf elf32-i386)
+
+.note.GNU-stack
+                0x0000000000000000        0x0
+ .note.GNU-stack
+                0x0000000000000000        0x0 inithead.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 vgastr.o

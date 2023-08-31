@@ -1,0 +1,523 @@
+
+Merging program properties
+
+Removed property 0xc0000002 to merge hal_start.o (0x3) and init_entry.o (not found)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halinit.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halglobal.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halplatform.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and bdvideo.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halcpuctrl.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halprint.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halmm.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halintupt.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and i8259.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and halgdtidt.o (0x3)
+Removed property 0xc0000002 to merge hal_start.o (not found) and krlinit.o (0x3)
+
+舍弃的输入节
+
+ .note.gnu.property
+                0x0000000000000000       0x20 hal_start.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halinit.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halglobal.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halplatform.o
+ .note.gnu.property
+                0x0000000000000000       0x20 bdvideo.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halcpuctrl.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halprint.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halmm.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halintupt.o
+ .note.gnu.property
+                0x0000000000000000       0x20 i8259.o
+ .note.gnu.property
+                0x0000000000000000       0x20 halgdtidt.o
+ .note.gnu.property
+                0x0000000000000000       0x20 krlinit.o
+
+内存配置
+
+名称           来源             长度             属性
+*default*        0x0000000000000000 0xffffffffffffffff
+
+链结器命令稿和内存映射
+
+                0x0000000002000000                LINEAR_ADDRESS = 0x2000000
+                0xffff800000000000                VIRTUAL_ADDRESS = 0xffff800000000000
+                0x0000000002000000                . = LINEAR_ADDRESS
+                0xffff800002000000                __start_kernel = (. + VIRTUAL_ADDRESS)
+                0x0000000002000000                __begin_start_text = .
+
+.start.text     0x0000000002000000       0xbf
+ *(.start.text)
+ .start.text    0x0000000002000000       0xbf init_entry.o
+                0x0000000002000000                _start
+                0x00000000020000bf                __end_start_text = .
+                0x00000000020000bf                __begin_start_data = .
+
+.start.data     0x00000000020000c0       0x32
+ *(.start.data)
+ .start.data    0x00000000020000c0       0x32 init_entry.o
+                0x00000000020000f2                __end_start_data = .
+                0x00000000020000f2                __begin_start_data_pml4 = .
+
+.start.data.pml4
+ *(.start.data.pml4)
+                0x00000000020000f2                __end_start_data_pml4 = .
+                0xffff8000020000f2                . = (. + VIRTUAL_ADDRESS)
+                0xffff8000020000f2                __begin_entry64_text = .
+
+.entry64.text
+ *(.entry64.text)
+                0xffff8000020000f2                __end_entry64_text = .
+                0xffff8000020000f2                __begin_hwint_text = .
+
+.hwint.text     0xffff8000020000f4     0x1bf9 加载地址 0x00000000020000f4
+ *(.hwint.text)
+ *fill*         0xffff8000020000f4        0xc 
+ .hwint.text    0xffff800002000100     0x1bed kernel.o
+                0xffff800002000100                exc_divide_error
+                0xffff800002000190                exc_single_step_exception
+                0xffff800002000220                exc_nmi
+                0xffff8000020002b0                exc_breakpoint_exception
+                0xffff800002000340                exc_overflow
+                0xffff8000020003d0                exc_bounds_check
+                0xffff800002000460                exc_inval_opcode
+                0xffff8000020004f0                exc_copr_not_available
+                0xffff800002000580                exc_double_fault
+                0xffff800002000610                exc_copr_seg_overrun
+                0xffff8000020006a0                exc_inval_tss
+                0xffff800002000730                exc_segment_not_present
+                0xffff8000020007c0                exc_stack_exception
+                0xffff800002000850                exc_general_protection
+                0xffff8000020008e0                exc_page_fault
+                0xffff800002000970                exc_copr_error
+                0xffff800002000a00                exc_alignment_check
+                0xffff800002000a90                exc_machine_check
+                0xffff800002000b20                exc_simd_fault
+                0xffff800002000bb0                hxi_exc_general_intpfault
+                0xffff800002000c40                hxi_hwint00
+                0xffff800002000cc0                hxi_hwint01
+                0xffff800002000d40                hxi_hwint02
+                0xffff800002000dc0                hxi_hwint03
+                0xffff800002000e40                hxi_hwint04
+                0xffff800002000ec0                hxi_hwint05
+                0xffff800002000f40                hxi_hwint06
+                0xffff800002000fc0                hxi_hwint07
+                0xffff800002001040                hxi_hwint08
+                0xffff8000020010c0                hxi_hwint09
+                0xffff800002001140                hxi_hwint10
+                0xffff8000020011c0                hxi_hwint11
+                0xffff800002001240                hxi_hwint12
+                0xffff8000020012c0                hxi_hwint13
+                0xffff800002001340                hxi_hwint14
+                0xffff8000020013c0                hxi_hwint15
+                0xffff800002001440                hxi_hwint16
+                0xffff8000020014c0                hxi_hwint17
+                0xffff800002001540                hxi_hwint18
+                0xffff8000020015c0                hxi_hwint19
+                0xffff800002001640                hxi_hwint20
+                0xffff8000020016c0                hxi_hwint21
+                0xffff800002001740                hxi_hwint22
+                0xffff8000020017c0                hxi_hwint23
+                0xffff800002001840                hxi_apic_ipi_schedul
+                0xffff8000020018c0                hxi_apic_svr
+                0xffff800002001940                hxi_apic_timer
+                0xffff8000020019c0                hxi_apic_thermal
+                0xffff800002001a40                hxi_apic_performonitor
+                0xffff800002001ac0                hxi_apic_lint0
+                0xffff800002001b40                hxi_apic_lint1
+                0xffff800002001bc0                hxi_apic_error
+                0xffff800002001c40                exi_sys_call
+                0xffff800002001cc0                asm_ret_from_user_mode
+                0xffff800002001ced                __end_hwint_text = .
+                0xffff800002001ced                __begin_sirq_text = .
+
+.sirq.text
+ *(.sirq.sirq)
+                0xffff800002001ced                __end_sirq_text = .
+                0xffff800002001ced                __begin_scall_text = .
+
+.scall.text
+ *(.scall.text)
+                0xffff800002001ced                __end_scall_text = .
+                0xffff800002001ced                __begin_sched_text = .
+
+.sched.text
+ *(.sched.text)
+                0xffff800002001ced                __end_sched_text = .
+                0xffff800002001ced                __begin_fs_text = .
+
+.fs.text
+ *(.fs.text)
+                0xffff800002001ced                __end_fs_text = .
+                0xffff800002001ced                __begin_drive_text = .
+
+.drive.text
+ *(.drive.text)
+                0xffff800002001ced                __end_drive_text = .
+                0xffff800002001ced                __begin_text = .
+
+.text           0xffff800002001cf0     0x504d 加载地址 0x0000000002001cf0
+ *(.text)
+ .text          0xffff800002001cf0       0x3e hal_start.o
+                0xffff800002001cf0                hal_start
+ *fill*         0xffff800002001d2e        0x2 
+ .text          0xffff800002001d30       0x2d halinit.o
+                0xffff800002001d30                init_hal
+ .text          0xffff800002001d5d        0x0 halglobal.o
+ *fill*         0xffff800002001d5d        0x3 
+ .text          0xffff800002001d60      0xc53 halplatform.o
+                0xffff800002001d60                die
+                0xffff800002001df0                virtadr_to_phyadr
+                0xffff800002001e60                phyadr_to_viradr
+                0xffff800002001ec0                machbstart_t_init
+                0xffff800002001ee0                init_machbstart
+                0xffff800002001f60                init_halplaltform
+                0xffff800002001ff0                strcmpl
+                0xffff800002002040                get_fileinfo
+                0xffff800002002210                get_file_rvadrandsz
+                0xffff8000020022f0                get_maxmappadr_e820map
+                0xffff8000020023d0                ret_kmaxmpadrcmpsz_e820map
+                0xffff8000020024f0                adrzone_is_ok
+                0xffff800002002530                initchkadr_is_ok
+                0xffff800002002760                move_img2maxpadr
+ *fill*         0xffff8000020029b3        0xd 
+ .text          0xffff8000020029c0     0x1d44 bdvideo.o
+                0xffff8000020029c0                bga_read
+                0xffff8000020029d0                bga_ioctrl
+                0xffff8000020029e0                bga_set_bank
+                0xffff8000020029f0                bga_readpix
+                0xffff800002002a00                bga_set_xy
+                0xffff800002002a40                bga_set_vwh
+                0xffff800002002a80                bga_set_xyoffset
+                0xffff800002002ac0                bga_get_xy
+                0xffff800002002b20                bga_get_vwh
+                0xffff800002002b80                bga_get_xyoffset
+                0xffff800002002be0                vbe_flush
+                0xffff800002002c20                vbe_set_xy
+                0xffff800002002c30                vbe_get_xy
+                0xffff800002002c40                bga_writepix
+                0xffff800002002c80                bga_dxwritepix
+                0xffff800002002ce0                vbe_dxwritepix
+                0xffff800002002d20                vbe_get_vwh
+                0xffff800002002d30                vbe_set_xyoffset
+                0xffff800002002d40                vbe_dxreadpix
+                0xffff800002002d50                vbe_ioctrl
+                0xffff800002002d60                vbe_write
+                0xffff800002002d70                vbe_get_xyoffset
+                0xffff800002002d80                bga_write
+                0xffff800002002d90                bga_dxreadpix
+                0xffff800002002da0                vbe_read
+                0xffff800002002db0                vbe_readpix
+                0xffff800002002dc0                vbe_set_vwh
+                0xffff800002002dd0                vbe_set_bank
+                0xffff800002002de0                vbe_writepix
+                0xffff800002002e20                bga_flush
+                0xffff800002002ec0                init_dftgraph
+                0xffff800002003000                set_deffontpx
+                0xffff800002003040                set_ncharsxy
+                0xffff800002003080                set_charsdxwflush
+                0xffff8000020030c0                hal_dspversion
+                0xffff800002003170                fill_rect
+                0xffff800002003230                fill_fullbitmap
+                0xffff800002003340                slou_sreen
+                0xffff8000020033f0                hal_background
+                0xffff800002003580                hal_logo
+                0xffff800002003710                init_bga
+                0xffff8000020038b0                init_vbe
+                0xffff800002003a50                fill_graph
+                0xffff800002003ac0                init_bdvideo
+                0xffff800002003e20                write_pixcolor
+                0xffff800002003e40                drxw_pixcolor
+                0xffff800002003e60                flush_videoram
+                0xffff800002003e70                utf8_to_unicode
+                0xffff800002003fc0                ret_charsinfo
+                0xffff800002003ff0                put_pixonechar
+                0xffff800002004290                drxput_pixonechar
+                0xffff800002004530                gstr_write
+                0xffff800002004650                bga_write_reg
+                0xffff800002004670                bga_read_reg
+                0xffff800002004690                ret_vramadr_inbnk
+                0xffff8000020046b0                bga_disp_nxtbank
+ *fill*         0xffff800002004704        0xc 
+ .text          0xffff800002004710      0x1a7 halcpuctrl.o
+                0xffff800002004710                hal_spinlock_init
+                0xffff800002004720                hal_spinlock_lock
+                0xffff800002004740                hal_spinlock_unlock
+                0xffff800002004750                hal_spinlock_saveflg_cli
+                0xffff800002004770                hal_spinunlock_restflg_sti
+                0xffff800002004780                knl_spinlock_init
+                0xffff800002004790                knl_spinlock_lock
+                0xffff8000020047b0                knl_spinlock_unlock
+                0xffff8000020047c0                knl_spinlock_cli
+                0xffff8000020047e0                knl_spinunlock_sti
+                0xffff8000020047f0                hal_memset
+                0xffff800002004810                hal_memcpy
+                0xffff800002004840                hal_sysdie
+                0xffff800002004880                system_error
+                0xffff8000020048b0                hal_retn_cpuid
+ *fill*         0xffff8000020048b7        0x9 
+ .text          0xffff8000020048c0      0x4c2 halprint.o
+                0xffff8000020048c0                strcopyk
+                0xffff8000020048f0                vsprintfk
+                0xffff800002004bd0                kprint
+                0xffff800002004ce0                numberk
+ *fill*         0xffff800002004d82        0xe 
+ .text          0xffff800002004d90      0x5e9 halmm.o
+                0xffff800002004d90                phymmarge_t_init
+                0xffff800002004e00                ret_phymmarge_adrandsz
+                0xffff800002004ea0                init_one_pmrge
+                0xffff800002004f80                phymmarge_swap
+                0xffff800002005040                phymmarge_sort
+                0xffff8000020050d0                initpmrge_core
+                0xffff8000020051f0                init_phymmarge
+                0xffff800002005350                init_halmm
+ *fill*         0xffff800002005379        0x7 
+ .text          0xffff800002005380      0x7cc halintupt.o
+                0xffff800002005380                intfltdsc_t_init
+                0xffff800002005450                init_intfltdsc
+                0xffff800002005550                init_halintupt
+                0xffff800002005690                hal_retn_intfltdsc
+                0xffff8000020056e0                intserdsc_t_init
+                0xffff800002005720                hal_add_ihandle
+                0xffff8000020057d0                hal_enable_intline
+                0xffff800002005820                hal_disable_intline
+                0xffff800002005870                hal_intflt_default
+                0xffff800002005890                hal_run_intflthandle
+                0xffff800002005940                hal_do_hwint
+                0xffff800002005ab0                hal_fault_allocator
+                0xffff800002005af0                hal_syscl_allocator
+                0xffff800002005b00                hal_hwint_allocator
+ *fill*         0xffff800002005b4c        0x4 
+ .text          0xffff800002005b50      0x196 i8259.o
+                0xffff800002005b50                init_i8259
+                0xffff800002005ba0                i8259_send_eoi
+                0xffff800002005bc0                i8259_enabled_line
+                0xffff800002005c10                i8259_disable_line
+                0xffff800002005c60                i8259_save_disableline
+                0xffff800002005cc0                i8259_rest_enabledline
+ *fill*         0xffff800002005ce6        0xa 
+ .text          0xffff800002005cf0     0x101b halgdtidt.o
+                0xffff800002005cf0                set_idt_desc
+                0xffff800002005d50                set_igdtr
+                0xffff800002005d60                set_iidtr
+                0xffff800002005da0                set_descriptor
+                0xffff800002005df0                set_x64tss_descriptor
+                0xffff800002005e50                load_x64_gdt
+                0xffff800002005e80                load_x64_idt
+                0xffff800002005e90                load_x64_tr
+                0xffff800002005ea0                init_descriptor
+                0xffff800002005fa0                init_idt_descriptor
+ *fill*         0xffff800002006d0b        0x5 
+ .text          0xffff800002006d10       0x2d krlinit.o
+                0xffff800002006d10                init_krl
+                0xffff800002006d3d                __end_text = .
+                0xffff800002006d3d                __begin_spinlock_text = .
+
+.iplt           0xffff800002006d3d        0x0 加载地址 0x0000000002006d3d
+ .iplt          0xffff800002006d3d        0x0 init_entry.o
+
+.text.unlikely  0xffff800002006d3d       0x13 加载地址 0x0000000002006d3d
+ .text.unlikely
+                0xffff800002006d3d        0xa halplatform.o
+ .text.unlikely
+                0xffff800002006d47        0x9 bdvideo.o
+
+.spinlock.text  0xffff800002006d50       0x28 加载地址 0x0000000002006d50
+ *(.spinlock.text)
+ .spinlock.text
+                0xffff800002006d50       0x28 halcpuctrl.o
+                0xffff800002006d78                __end_spinlock_text = .
+                0xffff800002006d78                __begin_init_text = .
+
+.init.text
+ *(.init.text)
+                0xffff800002006d78                __end_init_text = .
+                0xffff800002006d78                __begin_driver_entry_text = .
+
+.drventry.text
+ *(.drventry.text)
+                0xffff800002006d78                __end_driver_entry_text = .
+                0xffff800002006d78                __begin_data = .
+
+.data           0xffff800002006d78     0xc1f8 加载地址 0x0000000002006d78
+ *(.data)
+ .data          0xffff800002006d78        0x0 hal_start.o
+ .data          0xffff800002006d78        0x0 halinit.o
+ *fill*         0xffff800002006d78        0x8 
+ .data          0xffff800002006d80     0xc1f0 halglobal.o
+                0xffff800002006d80                machintflt
+                0xffff800002010d80                memmgrob
+                0xffff800002011880                kdftgh
+                0xffff8000020119c0                kmachbsp
+                0xffff800002011e78                x64_iidt_reg
+                0xffff800002011e88                x64_igdt_reg
+                0xffff800002011ea0                x64tss
+                0xffff800002011f20                x64_idt
+                0xffff800002012f20                x64_gdt
+ .data          0xffff800002012f70        0x0 halplatform.o
+ .data          0xffff800002012f70        0x0 bdvideo.o
+ .data          0xffff800002012f70        0x0 halcpuctrl.o
+ .data          0xffff800002012f70        0x0 halprint.o
+ .data          0xffff800002012f70        0x0 halmm.o
+ .data          0xffff800002012f70        0x0 halintupt.o
+ .data          0xffff800002012f70        0x0 i8259.o
+ .data          0xffff800002012f70        0x0 halgdtidt.o
+ .data          0xffff800002012f70        0x0 krlinit.o
+ *(.bss)
+ .bss           0xffff800002012f70        0x0 hal_start.o
+ .bss           0xffff800002012f70        0x0 halinit.o
+ .bss           0xffff800002012f70        0x0 halglobal.o
+ .bss           0xffff800002012f70        0x0 halplatform.o
+ .bss           0xffff800002012f70        0x0 bdvideo.o
+ .bss           0xffff800002012f70        0x0 halcpuctrl.o
+ .bss           0xffff800002012f70        0x0 halprint.o
+ .bss           0xffff800002012f70        0x0 halmm.o
+ .bss           0xffff800002012f70        0x0 halintupt.o
+ .bss           0xffff800002012f70        0x0 i8259.o
+ .bss           0xffff800002012f70        0x0 halgdtidt.o
+ .bss           0xffff800002012f70        0x0 krlinit.o
+                0xffff800002012f70                __end_data = .
+                0xffff800002012f70                __begin_rodata = .
+
+.got            0xffff800002012f70      0x1e8 加载地址 0x0000000002012f70
+ .got           0xffff800002012f70      0x1e8 init_entry.o
+
+.got.plt        0xffff800002013158       0x18 加载地址 0x0000000002013158
+ .got.plt       0xffff800002013158       0x18 init_entry.o
+                0xffff800002013158                _GLOBAL_OFFSET_TABLE_
+
+.igot.plt       0xffff800002013170        0x0 加载地址 0x0000000002013170
+ .igot.plt      0xffff800002013170        0x0 init_entry.o
+
+.data.rel.local
+                0xffff800002013170        0x8 加载地址 0x0000000002013170
+ .data.rel.local
+                0xffff800002013170        0x8 bdvideo.o
+                0xffff800002013170                cosmos_version
+
+.rodata         0xffff800002013178      0x4ba 加载地址 0x0000000002013178
+ *(.rodata)
+ .rodata        0xffff800002013178       0xa1 halplatform.o
+ *fill*         0xffff800002013219        0x7 
+ .rodata        0xffff800002013220      0x1f0 bdvideo.o
+ .rodata        0xffff800002013410       0x14 halmm.o
+ *(.rodata.*)
+ *fill*         0xffff800002013424        0x4 
+ .rodata.str1.8
+                0xffff800002013428       0x8b bdvideo.o
+ .rodata.str1.1
+                0xffff8000020134b3       0x41 bdvideo.o
+ .rodata.str1.1
+                0xffff8000020134f4       0x18 halcpuctrl.o
+ .rodata.str1.1
+                0xffff80000201350c       0x11 halprint.o
+ *fill*         0xffff80000201351d        0x3 
+ .rodata.str1.8
+                0xffff800002013520       0xc6 halmm.o
+ .rodata.str1.1
+                0xffff8000020135e6       0x35 halintupt.o
+ *fill*         0xffff80000201361b        0x5 
+ .rodata.cst16  0xffff800002013620       0x10 halintupt.o
+ .rodata.cst2   0xffff800002013630        0x2 halgdtidt.o
+                0xffff800002013632                __end_rodata = .
+                0xffff800002013632                __begin_kstrtab = .
+
+.eh_frame       0xffff800002013638     0x1274 加载地址 0x0000000002013638
+ .eh_frame      0xffff800002013638       0x38 hal_start.o
+ .eh_frame      0xffff800002013670       0x18 halinit.o
+                                         0x30 (松开之前的大小)
+ .eh_frame      0xffff800002013688      0x2a0 halplatform.o
+                                        0x2b8 (松开之前的大小)
+ .eh_frame      0xffff800002013928      0x778 bdvideo.o
+                                        0x790 (松开之前的大小)
+ .eh_frame      0xffff8000020140a0      0x138 halcpuctrl.o
+                                        0x150 (松开之前的大小)
+ .eh_frame      0xffff8000020141d8       0x98 halprint.o
+                                         0xb0 (松开之前的大小)
+ .eh_frame      0xffff800002014270      0x210 halmm.o
+                                        0x228 (松开之前的大小)
+ .eh_frame      0xffff800002014480      0x2b8 halintupt.o
+                                        0x2d0 (松开之前的大小)
+ .eh_frame      0xffff800002014738       0x90 i8259.o
+                                         0xa8 (松开之前的大小)
+ .eh_frame      0xffff8000020147c8       0xc8 halgdtidt.o
+                                         0xe0 (松开之前的大小)
+ .eh_frame      0xffff800002014890       0x1c krlinit.o
+                                         0x38 (松开之前的大小)
+
+.rela.dyn       0xffff8000020148b0        0x0 加载地址 0x00000000020148b0
+ .rela.got      0xffff8000020148b0        0x0 init_entry.o
+ .rela.iplt     0xffff8000020148b0        0x0 init_entry.o
+
+.kstrtab
+ *(.kstrtab)
+                0xffff8000020148ac                __end_kstrtab = .
+                0xffff8000020148ac                __begin_apboot_text = .
+
+.apboot.text
+ *(.apboot.text)
+                0xffff8000020148ac                __end_apboot_text = .
+                0xffff8000020148ac                __begin_apboot_data = .
+
+.apboot.data
+ *(.apboot.data)
+                0xffff8000020148ac                __end_apboot_data = .
+                0xffff8000020148ac                __begin_kmodsattrb_data = .
+
+.kmodsattrbdata
+ *(.kmodsattrbdata)
+                0xffff8000020148ac                __end_kmodsattrb_data = .
+
+.krnl.krnend
+ *(.krnl.krnend)
+                0xffff8000020148ac                __end_kernel = .
+LOAD init_entry.o
+LOAD hal_start.o
+LOAD halinit.o
+LOAD halglobal.o
+LOAD halplatform.o
+LOAD bdvideo.o
+LOAD halcpuctrl.o
+LOAD halprint.o
+LOAD halmm.o
+LOAD halintupt.o
+LOAD kernel.o
+LOAD i8259.o
+LOAD halgdtidt.o
+LOAD krlinit.o
+OUTPUT(Cosmos.elf elf64-x86-64)
+
+.note.GNU-stack
+                0x0000000000000000        0x0
+ .note.GNU-stack
+                0x0000000000000000        0x0 hal_start.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halinit.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halglobal.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halplatform.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 bdvideo.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halcpuctrl.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halprint.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halmm.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halintupt.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 i8259.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 halgdtidt.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 krlinit.o
