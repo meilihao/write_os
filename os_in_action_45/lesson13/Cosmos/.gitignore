@@ -1,3 +1,4 @@
+*.map
 build/lmkfbuild
 build/*.elf
 initldr/build/lmoskrlimg

@@ -17,8 +17,10 @@ ref:
 
 添加`-cpu host`
 
-### `qemu-system-x86_64 -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm`报`Your computer is not support ACPI!!`(from vm 屏幕)
-为找到解决方法, 先注释`init_acpi()`
+### `qemu-system-x86_64 -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm -cpu host`报`Your computer is not support ACPI!!`(from vm 屏幕)
+问题在acpi_rsdp_isok, 它不支持acpi 1.0, 而qemu-system-x86_64 bios就是使用acpi 1.0, 先注释`init_acpi()`
 
-### `qemu-system-x86_64 -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm`报`INITKRL DIE ERROR：not find file`(from vm 屏幕)
+自编译seabios 1.16.2也是acpi 1.0(`qemu-system-x86_64 ... -bios xxx`)
+
+### `qemu-system-x86_64 -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm -cpu host`报`INITKRL DIE ERROR：not find file`(from vm 屏幕)
 根据12课评论说是正常, 原因是没有内核文件(`Makefile中LKIMG_INFILE中是否已包含$(KRNLEXCIMG)`), 13课完成后即可解决

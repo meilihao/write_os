@@ -4,7 +4,7 @@
 				彭东 
 **********************************************************/
 #include "cmctl.h"
-
+// [ebda=Extended BIOS Data Area](https://wiki.osdev.org/Memory_Map_(x86))
 unsigned int acpi_get_bios_ebda()
 {
 
@@ -23,14 +23,23 @@ int acpi_checksum(unsigned char *ap, s32_t len)
     return sum & 0xFF;
 }
 
+// [acpi_status acpi_tb_validate_rsdp](https://elixir.bootlin.com/linux/v6.5.1/source/drivers/acpi/acpica/tbxfroot.c#L59)
+// [acpi_scan_for_rsdp](https://github.com/anyc/pmtools/blob/master/acpidump/acpidump.c#L120)
 mrsdp_t *acpi_rsdp_isok(mrsdp_t *rdp)
 {
+    kprint("found rsdp.rp_revn:%d\n", rdp->rp_revn);
+    // if (rdp->rp_len == 0 || rdp->rp_revn == 0)
+    // {
+    //     return NULL;
+    // }
+    // if (0 == acpi_checksum((unsigned char *)rdp, (s32_t)rdp->rp_len))
+    // {
 
-    if (rdp->rp_len == 0 || rdp->rp_revn == 0)
-    {
-        return NULL;
-    }
-    if (0 == acpi_checksum((unsigned char *)rdp, (s32_t)rdp->rp_len))
+    //     return rdp;
+    // }
+    if (0 == acpi_checksum((unsigned char *)rdp, (rdp->rp_revn < 2) ?
+			      ACPI_RSDP_CHECKSUM_LENGTH :
+			      ACPI_RSDP_XCHECKSUM_LENGTH))
     {
 
         return rdp;
@@ -39,6 +48,7 @@ mrsdp_t *acpi_rsdp_isok(mrsdp_t *rdp)
     return NULL;
 }
 
+// [acpi_tb_scan_memory_for_rsdp](https://elixir.bootlin.com/linux/v6.5/source/drivers/acpi/acpica/tbxfroot.c#L240)
 mrsdp_t *findacpi_rsdp_core(void *findstart, u32_t findlen)
 {
     if (NULL == findstart || 1024 > findlen)
@@ -46,16 +56,20 @@ mrsdp_t *findacpi_rsdp_core(void *findstart, u32_t findlen)
         return NULL;
     }
 
-    u8_t *tmpdp = (u8_t *)findstart;
+    u8_t *mem_rover;
+    u8_t *end_address;
+
+    u8_t *start_address = (u8_t *)findstart;
+    end_address = start_address + findlen;
 
     mrsdp_t *retdrp = NULL;
-    for (u64_t i = 0; i <= findlen; i++)
+    for (mem_rover = start_address; mem_rover < end_address; mem_rover+=ACPI_RSDP_SCAN_STEP)
     {
-
-        if (('R' == tmpdp[i]) && ('S' == tmpdp[i + 1]) && ('D' == tmpdp[i + 2]) && (' ' == tmpdp[i + 3]) &&
-            ('P' == tmpdp[i + 4]) && ('T' == tmpdp[i + 5]) && ('R' == tmpdp[i + 6]) && (' ' == tmpdp[i + 7]))
+        if (('R' == mem_rover[0]) && ('S' == mem_rover[1]) && ('D' == mem_rover[2]) && (' ' == mem_rover[3]) &&
+            ('P' == mem_rover[4]) && ('T' == mem_rover[5]) && ('R' == mem_rover[6]) && (' ' == mem_rover[7]))
         {
-            retdrp = acpi_rsdp_isok((mrsdp_t *)(&tmpdp[i]));
+            kprint("found rsdp:%x\n", mem_rover);
+            retdrp = acpi_rsdp_isok((mrsdp_t *)(&mem_rover[0]));
             if (NULL != retdrp)
             {
                 return retdrp;
@@ -65,6 +79,10 @@ mrsdp_t *findacpi_rsdp_core(void *findstart, u32_t findlen)
     return NULL;
 }
 
+// [对于基于Legacy BIOS的系统而言，RSDP表所在的物理地址并不固定，要么位于EBDA（Extended BIOS Data Area）（位于物理地址0x40E）的前1KB范围内；要么位于0x000E0000 到0x000FFFFF的物理地址范围内](https://blog.csdn.net/lindahui2008/article/details/81813845)
+// 通过qemu monitor调试发现, acpi_get_bios_ebda's findstart开始的1024字节, 除了第一个字节是0x1外, 其他均为0
+// 通过`pmemsave 0xe0000 1048576 a.mem` + `hexdump -C a.mem |grep "RSD PTR"`验证, qemu-system-x86_64 ACPI RSDP确实在0x000E0000到0x000FFFFF的`xp /1024bx 0xf59e0`(0xf59e0可能会动, 但试了2次都没动; 换成自编译的seabios 1.16.2变成了0xf59c0; seabios 1.16.2+`-machine q35`变成了0xf59d0)
+// [seabios 1.16.2也是acpi 1.0](https://github.com/coreboot/seabios/blob/master/src/fw/acpi.c#L677)
 PUBLIC mrsdp_t *find_acpi_rsdp()
 {
 
@@ -118,7 +136,7 @@ void init_mem(machbstart_t *mbsp)
     mbsp->mb_e820nr = (u64_t)retemnr;
     mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));
     mbsp->mb_memsz = get_memsize(retemp, retemnr);
-    //init_acpi(mbsp);
+    init_acpi(mbsp);
     return;
 }
 void init_chkcpu(machbstart_t *mbsp)

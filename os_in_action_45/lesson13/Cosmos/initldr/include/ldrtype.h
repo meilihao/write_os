@@ -356,6 +356,32 @@ typedef struct s_KLFOCPYMBLK
 }__attribute__((packed)) klfocpymblk_t;
 #define MBS_MIGC (u64_t)((((u64_t)'L')<<56)|(((u64_t)'M')<<48)|(((u64_t)'O')<<40)|(((u64_t)'S')<<32)|(((u64_t)'M')<<24)|(((u64_t)'B')<<16)|(((u64_t)'S')<<8)|((u64_t)'P'))
 
+// https://elixir.bootlin.com/linux/v6.5.1/source/include/acpi/actbl.h#L105
+// struct acpi_table_rsdp {
+// 	char signature[8];	/* ACPI signature, contains "RSD PTR " */
+// 	u8 checksum;		/* ACPI 1.0 checksum */
+// 	char oem_id[ACPI_OEM_ID_SIZE];	/* OEM identification */
+// 	u8 revision;		/* Must be (0) for ACPI 1.0 or (2) for ACPI 2.0+ */
+// 	u32 rsdt_physical_address;	/* 32-bit physical address of the RSDT */
+// 	u32 length;		/* Table length in bytes, including header (ACPI 2.0+) */
+// 	u64 xsdt_physical_address;	/* 64-bit physical address of the XSDT (ACPI 2.0+) */
+// 	u8 extended_checksum;	/* Checksum of entire table (ACPI 2.0+) */
+// 	u8 reserved[3];		/* Reserved, must be zero */
+// };
+// (qemu) xp /36bx 0xf59e0 
+// xp /36bx 0xf59e0
+// 00000000000f59e0: 0x52 0x53 0x44 0x20 0x50 0x54 0x52 0x20 // sign(8)
+// 00000000000f59e8: 0x0f 0x42 0x4f 0x43 0x48 0x53 0x20 0x00 // chksum(1)+oemid(6)+revn(1)
+// 00000000000f59f0: 0x1c 0x1a 0xfe 0x0f 0x00 0x00 0x00 0x00 // rsdtphyadr(4)+len(4)
+// 00000000000f59f8: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 // xsdtphyadr(8)
+// 00000000000f5a00: 0x5f 0x53 0x4d 0x5f // echksum(1)+ resv(3)
+// (qemu) xp /36c 0xf59e0
+// xp /36c 0xf59e0
+// 00000000000f59e0: 'R' 'S' 'D' ' ' 'P' 'T' 'R' ' '
+// 00000000000f59e8: '\x0f' 'B' 'O' 'C' 'H' 'S' ' ' '\x00'
+// 00000000000f59f0: '\x1c' '\x1a' '\xfe' '\x0f' '\x00' '\x00' '\x00' '\x00'
+// 00000000000f59f8: '\x00' '\x00' '\x00' '\x00' '\x00' '\x00' '\x00' '\x00'
+// 00000000000f5a00: '_' 'S' 'M' '_'
 typedef struct s_MRSDP
 {
     u64_t rp_sign;

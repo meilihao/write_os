@@ -17,7 +17,9 @@
 #define PTE_BADR 0x23000
 
 #define PG_SIZE 512
-
+#define ACPI_RSDP_SCAN_STEP 16
+#define ACPI_RSDP_CHECKSUM_LENGTH       20
+#define ACPI_RSDP_XCHECKSUM_LENGTH      36
 
 
 

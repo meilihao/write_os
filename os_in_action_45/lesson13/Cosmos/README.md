@@ -16,4 +16,6 @@ hal_start()
     init_krl()    //初始化内核: 死循环
 
 ## 效果
-qemu-system-x86_64启动是黑屏(已注释init_acpi).
+使用lesson10~11的HelloOS/setup.sh测试
+
+qemu-system-x86_64启动是黑屏, 并会自动重启(已解决acpi问题).
