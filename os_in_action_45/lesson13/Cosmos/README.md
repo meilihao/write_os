@@ -16,6 +16,8 @@ hal_start()
     init_krl()    //初始化内核: 死循环
 
 ## 效果
+演示: 屏幕显示Cosmos 的版本、编译时间、CPU 工作模式，内存大小等数据
+
 使用lesson10~11的HelloOS/setup.sh测试
 
 qemu-system-x86_64启动是黑屏, 并会自动重启(已解决acpi问题).
