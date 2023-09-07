@@ -1,0 +1,7 @@
+*.map
+build/lmkfbuild
+build/*.elf
+initldr/build/lmoskrlimg
+initldr/build/*.elf
+release/lmoskrlimg
+release/Cosmos.eki
