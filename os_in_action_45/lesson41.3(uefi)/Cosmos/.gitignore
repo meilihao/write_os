@@ -1,0 +1,12 @@
+*.map
+build/lmkfbuild
+build/*.elf
+initldr/legacy/build/lmoskrlimg
+initldr/legacy/build/*.elf
+initldr/legacy/build/lmkfbuild
+initldr/uefi/build/lmoskrlimg
+initldr/uefi/build/*.elf
+initldr/uefi/build/lmkfbuild
+ovmf/esp/Kernel/*.eki
+release/lmoskrlimg
+release/Cosmos.eki
