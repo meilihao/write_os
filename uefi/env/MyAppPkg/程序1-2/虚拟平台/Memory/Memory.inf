@@ -1,0 +1,39 @@
+#/***************************************************
+#*		版权声明
+#*
+#*	本操作系统名为：MINE
+#*	该操作系统未经授权不得以盈利或非盈利为目的进行开发，
+#*	只允许个人学习以及公开交流使用
+#*
+#*	代码最终所有权及解释权归田宇所有；
+#*
+#*	本模块作者：	田宇
+#*	EMail:		345538255@qq.com
+#*
+#*
+#***************************************************/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Memory
+  FILE_GUID                      = 6987936E-f301-4a63-9661-fc6030dcc855
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  Memory.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+
+[Protocols]
+  gEfiGraphicsOutputProtocolGuid
+
+[Guids]
+
+

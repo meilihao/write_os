@@ -1,0 +1,18 @@
+# Variables defined to be used during the build process
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = HelloWorld # 输出文件的名字为 HelloWorld.efi
+  FILE_GUID                      = 6987936E-f301-4a63-9661-fc6030dcc899
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain # program entry point
+
+[Sources]
+  HelloWorld.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
