@@ -5,6 +5,11 @@
 
 实际演示步骤见lesson10~11, 最终项目见lesson41.3(uefi), 其已支持bios和uefi, 推荐只看uefi. 因为[qemu bios仅支持acpi 1.0](lesson10~11/Cosmos/README.md), 运行起来会报错, 且bios也是在被uefi取代中.
 
+Cosmos gdb调试见[这里](https://time.geekbang.org/column/article/469046), 参考书和Cosmos装载地址明细见[这里](https://time.geekbang.org/column/article/526253)
+
+其他os项目:
+- [从零到一手写操作系统](https://aeneag.xyz/virginOS)
+
 ## 关于Cosmos项目
 
 Cosmos项目是一个由 Cosmos开发者团队自主设计、研发包含了操作系统与RISC-V软核SOC处理器的计算机基础设施。Cosmos项目受到了OSDI'18 LegoOS论文的启发，目标在彻底抛弃目前计算机体系中积累的软硬件体系中的诸多历史包袱后，引入现代化的工程思想进行重新设计与实现。从而使得操作系统、芯片可以具有更高的模块化、低耦合、以及更强的可复用性和可扩展能力。Cosmos项目由Cosmos OS操作系统和Cosmos SOC芯片两部分构成。

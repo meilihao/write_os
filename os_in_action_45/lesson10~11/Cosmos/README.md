@@ -7,7 +7,7 @@ pushd .
 cd ../HelloOS
 sudo ./setup.sh
 popd
-qemu-system-x86_64  -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm
+qemu-system-x86_64  -smp 4 -hda ../HelloOS/os.qcow2 -m 256 -enable-kvm -cpu host
 ```
 
 ## FAQ

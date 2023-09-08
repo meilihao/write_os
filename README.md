@@ -11,9 +11,10 @@
 - <<一个64位操作系统的设计与实现>>
 	- [code](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
 	- [author + new](https://www.ituring.com.cn/space/186920)
+	- [sOS64](https://github.com/jiebaomaster/sOS64)
 
 	作者的其他作品:
-	- [一个UEFI引导程序的实现](https://www.ituring.com.cn/book/2763)
+	- [一个UEFI引导程序的实现 + 代码](https://www.ituring.com.cn/book/2763)
 
 -  操作系统真象还原
 	- [《操作系统真象还原》源码及学习笔记（os-elephant）还原真相](https://github.com/yifengyou/os-elephant)
@@ -23,6 +24,8 @@
 - Orange's 一个操作系统的实现
 - x86/x64体系探索及编程
 - [从零开始写 OS 内核](https://segmentfault.com/a/1190000040124650)
+- [xbook2](https://github.com/hzcx998/xbook2)
+- **xv6**
 
 ## ref
 - [x86汇编语言](https://www.jianshu.com/p/7f63e62e0ffd)
@@ -37,3 +40,4 @@
 
 ## uefi
 - [UEFI BootLoader for ToyOS.](https://github.com/tanyugang/UEFI)
+- [uefi_specs_personal_collections](https://github.com/xiaopangzi313/uefi_specs_personal_collections)

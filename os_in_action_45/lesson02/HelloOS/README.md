@@ -47,7 +47,7 @@ qemu-system-i386 -hda os.qcow2
 解决方法: `multiboot2 /boot/HelloOS.bin`改为`multiboot2 /HelloOS.bin`
 
 ### raw image
-**推荐使用qemu image**
+**推荐使用qemu image**，废弃losetup, 因为lsblk看不到loop0的分区, 没法格式化.
 
 ```bash
 dd bs=1M if=/dev/zero of=hd.img count=100 # 100M
