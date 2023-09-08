@@ -3,9 +3,10 @@
 ## edk2
 ref:
 - [UEFI 基础教程 （一） - 运行第一个APP HelloWorld](https://blog.csdn.net/weixin_41028621/article/details/112546820)
-- [hello-world-uefi](https://github.com/davysouza/hello-world-uefi)
-
+- [**My First UEFI Application**](https://davysouza.medium.com/my-first-uefi-application-486f319cf4a4)
 	target是arm
+
+	code: [hello-world-uefi](https://github.com/davysouza/hello-world-uefi)
 
 edk2环境设置见`programming-interface/arch/uefi.md`.
 
