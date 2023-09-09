@@ -15,7 +15,9 @@
 
 #include <Uefi.h>
 
-EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *SystemTable)
+EFI_STATUS EFIAPI UefiMain(
+	IN EFI_HANDLE ImageHandle, // image句柄
+	IN EFI_SYSTEM_TABLE *SystemTable) // 系统表指针
 {
 	SystemTable->ConOut->OutputString(SystemTable->ConOut,L"Hello World\n");
 	return EFI_SUCCESS;
