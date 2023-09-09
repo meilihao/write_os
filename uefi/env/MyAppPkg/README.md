@@ -1,4 +1,10 @@
 # README
+
+## build
+```bash
+build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
+```
+
 ## FAQ
 ### File/directory not found in workspace
 没有指定env PACKAGES_PATH, 获取其包含相对路径
