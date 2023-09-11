@@ -24,3 +24,5 @@
 [Components]
     MyAppPkg/HelloWorld/HelloWorld.inf
     MyAppPkg/Video/Video.inf
+    MyAppPkg/VideoSet/VideoSet.inf
+    MyAppPkg/Memory/Memory.inf
