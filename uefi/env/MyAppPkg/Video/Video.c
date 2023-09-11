@@ -11,6 +11,7 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	UINTN InfoSize = 0;
 	int i = 0;
 
+	// ErrorCode in MdePkg/Include/Uefi/UefiBaseType.h
 	Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid,NULL,(VOID **)&gGraphicsOutput);
 	if(EFI_ERROR(Status))
     {
@@ -33,10 +34,11 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 		gBS->FreePool(Info);
 	}
 
-	Status = gBS->CloseProtocol(gGraphicsOutput,&gEfiGraphicsOutputProtocolGuid,ImageHandle,NULL); // 总是失败???
+	// [通过HandleProtocol和LocateProtocol打开的Protocol因为没有指定AgentHandle，所以无法关闭。如果一定要关闭它，则要调用OpenProtocolInformation（）获得AgentHandle和ControllerHandle，然后再关闭它](https://blog.csdn.net/sevensevensevenday/article/details/70917178)
+	Status = gBS->CloseProtocol(gGraphicsOutput,&gEfiGraphicsOutputProtocolGuid,ImageHandle,NULL);
 	if(EFI_ERROR(Status))
 	{
-		Print(L"Failed to CloseProtocol.\n");
+		Print(L"Failed to CloseProtocol:%d.\n", Status);
 		return Status;
 	}
 
