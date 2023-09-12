@@ -1,18 +1,3 @@
-/***************************************************
-*		��Ȩ����
-*
-*	������ϵͳ��Ϊ��MINE
-*	�ò���ϵͳδ����Ȩ������ӯ�����ӯ��ΪĿ�Ľ��п�����
-*	ֻ��������ѧϰ�Լ���������ʹ��
-*
-*	������������Ȩ������Ȩ���������У�
-*
-*	��ģ�����ߣ�	����
-*	EMail:		345538255@qq.com
-*
-*
-***************************************************/
-
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -34,7 +19,7 @@ EFI_DEVICE_PATH_PROTOCOL* WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL* DevPat
 	EFI_DEVICE_PATH_PROTOCOL* pDevPath = DevPath;
 	while(!IsDevicePathEnd (pDevPath))
 	{
-        	if(Callbk)
+        if(Callbk)
 		{
 			EFI_STATUS Status = Callbk(pDevPath);
 			if(Status != 0) 
@@ -49,6 +34,12 @@ EFI_DEVICE_PATH_PROTOCOL* WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL* DevPat
 }
 
 
+// 系统中的每个设备都有一个唯一的路径
+// 设备路径中的节点称为设备节点，设备路径由设备节点组成的列表构成，列表由结束设备节点结束
+// 每个设备节点都以EFI_DEVICE_PATH_PROTOCOL开始，结束设备节点是一个特设的设备节点，它的类型为0x7F，次类型为0xFF或0x01，节点长度为2字节
+// UEFI提供了EFI_DEVICE_PATH_TO_TEXT_PROTOCOL用于将设备路径转换为字符串，其中的成员函数ConvertDevicePathToText用于将设备路径DevicePath转换为字符串
+// IsDevicePathEnd（CONST VOID *Node）用于判断设备节点Node是否为设备路径的设备结束节点
+// NextDevicePathNode（CONST VOID *Node）用于返回设备节点Node的下一个设备节点
 EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *SystemTable)
 {
 	EFI_LOADED_IMAGE        *LoadedImage;
@@ -62,10 +53,11 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 
 	gBS->LocateProtocol(&gEfiDevicePathToTextProtocolGuid,NULL,(VOID**)&Device2TextProtocol);
 	gBS->HandleProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,(VOID*)&LoadedImage);
+	// LoadedImage->DeviceHandle: 加载 EFI 映像的设备句柄
 	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiDevicePathProtocolGuid,(VOID*)&DevicePath);
 
 	CHAR16* TextDevicePath = Device2TextProtocol->ConvertDevicePathToText(DevicePath,FALSE,TRUE); 
-	Print(L"%s\n",TextDevicePath);
+	Print(L"TextDevicePath:%s\n",TextDevicePath);
 	if(TextDevicePath)
 		gBS->FreePool(TextDevicePath);
 	WalkthroughDevicePath(DevicePath,PrintNode); 

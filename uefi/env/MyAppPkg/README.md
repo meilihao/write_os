@@ -5,6 +5,14 @@
 build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
 ```
 
+## example
+- [一个UEFI引导程序的实现](https://www.ituring.com.cn/book/2763)
+
+    - Memory
+    - Video
+    - VideoSet
+    - File
+
 ## FAQ
 ### File/directory not found in workspace
 没有指定env PACKAGES_PATH, 获取其包含相对路径

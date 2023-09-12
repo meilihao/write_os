@@ -26,3 +26,4 @@
     MyAppPkg/Video/Video.inf
     MyAppPkg/VideoSet/VideoSet.inf
     MyAppPkg/Memory/Memory.inf
+    MyAppPkg/File/File.inf
