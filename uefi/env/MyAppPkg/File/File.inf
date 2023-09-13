@@ -21,6 +21,7 @@
   gEfiDevicePathToTextProtocolGuid
   gEfiSimpleFileSystemProtocolGuid
   gEfiLoadedImageProtocolGuid
+  gEfiDiskIoProtocolGuid
 
 [Guids]
   gEfiFileInfoGuid

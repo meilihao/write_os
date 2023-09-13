@@ -4,6 +4,7 @@
 #include <Protocol/DevicePathToText.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/LoadedImage.h>
+#include <Protocol/DiskIo.h>
 #include <Guid/FileInfo.h>
 #include <Library/DevicePathLib.h>
 
@@ -42,21 +43,65 @@ EFI_DEVICE_PATH_PROTOCOL* WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL* DevPat
 // NextDevicePathNode（CONST VOID *Node）用于返回设备节点Node的下一个设备节点
 EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *SystemTable)
 {
+	EFI_STATUS          Status  = EFI_SUCCESS;
+	UINTN               HandleIndex,NumHandles;
+	EFI_HANDLE *ControllerHandle =NULL;
+
 	EFI_LOADED_IMAGE        *LoadedImage;
 	EFI_DEVICE_PATH         *DevicePath;
 	EFI_FILE_IO_INTERFACE   *Vol;
 	EFI_FILE_HANDLE         RootFs;
 	EFI_FILE_HANDLE         FileHandle;
+	CHAR16* TextDevicePath;
 
 
 	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL* Device2TextProtocol = 0;
 
 	gBS->LocateProtocol(&gEfiDevicePathToTextProtocolGuid,NULL,(VOID**)&Device2TextProtocol);
+
+
+    //找出所有支持DiskIo的设备, 比如ata控制器, 具体分区(没有未分区磁盘)
+	Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
+	if (EFI_ERROR(Status)) {
+			Print(L"No Disk\n");
+			return Status;
+	}
+	Print(L"Found Num: %d\n", NumHandles);
+
+	//遍历每个DiskIo设备，并打开设备上的DevicePathprotocol
+  	EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
+	for(HandleIndex=0;HandleIndex<NumHandles;HandleIndex++){
+			Status = gBS->OpenProtocol(ControllerHandle[HandleIndex],
+										&gEfiDevicePathProtocolGuid,
+										(VOID**)&DiskDevicePath,
+										gImageHandle,
+										NULL,
+										EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+	
+			if (EFI_ERROR(Status)){
+					continue;
+			}  
+	
+			TextDevicePath = Device2TextProtocol->ConvertDevicePathToText(DiskDevicePath,TRUE,TRUE);
+			Print(L"TextDevicePath:%s\n",TextDevicePath);
+
+			if(TextDevicePath)
+			{
+				gBS->FreePool(TextDevicePath);
+			}
+
+		//遍历设备路径DiskDevicePath里的各个设备节点
+		WalkthroughDevicePath(DiskDevicePath,PrintNode);
+		Print(L"\n\n");
+	}
+
+	Print(L"---\n\n");
+
 	gBS->HandleProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,(VOID*)&LoadedImage);
 	// LoadedImage->DeviceHandle: 加载 EFI 映像的设备句柄
 	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiDevicePathProtocolGuid,(VOID*)&DevicePath);
 
-	CHAR16* TextDevicePath = Device2TextProtocol->ConvertDevicePathToText(DevicePath,FALSE,TRUE); 
+	TextDevicePath = Device2TextProtocol->ConvertDevicePathToText(DevicePath,FALSE,TRUE); 
 	Print(L"TextDevicePath:%s\n",TextDevicePath);
 	if(TextDevicePath)
 		gBS->FreePool(TextDevicePath);
