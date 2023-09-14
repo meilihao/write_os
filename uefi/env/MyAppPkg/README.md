@@ -2,6 +2,7 @@
 
 ## build
 ```bash
+cd MyAppPkg
 build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
 ```
 
