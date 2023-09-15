@@ -87,7 +87,7 @@ EFI_STATUS ReadFile(
     EFI_STATUS Status = EFI_SUCCESS;
     EFI_FILE_INFO *FileInfo;
 
-    UINTN InfoSize = sizeof(EFI_FILE_INFO) + 128;
+    UINTN InfoSize = sizeof(EFI_FILE_INFO) + 128; // ???why add 128
     Status = gBS->AllocatePool(
         EfiLoaderData,
         InfoSize,
@@ -119,7 +119,7 @@ EFI_STATUS ReadFile(
     Print(L"SUCCESS:FileInfo is getted.\n");
     #endif
     
-    UINTN FilePageSize = (FileInfo->FileSize >> 12) + 1;
+    UINTN FilePageSize = (FileInfo->FileSize >> 12) + 1; // 4k=`>> 12`, `+1` for 余数
     
     EFI_PHYSICAL_ADDRESS FileBufferAddress;
     Status = gBS->AllocatePages(

@@ -1,7 +1,7 @@
 #include "Video.h"
 #include "File.h"
 
-#define GAP 1
+#define GAP 4
 
 EFI_STATUS VideoInit(
     IN EFI_HANDLE ImageHandle,

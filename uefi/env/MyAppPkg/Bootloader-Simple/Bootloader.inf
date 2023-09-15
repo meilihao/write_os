@@ -20,6 +20,10 @@
 [LibraryClasses]
     UefiApplicationEntryPoint
     UefiLib
+
+[Protocols]
+  gEfiDevicePathToTextProtocolGuid
+
 [Guids]
     gEfiFileInfoGuid
 

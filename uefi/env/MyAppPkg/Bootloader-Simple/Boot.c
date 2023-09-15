@@ -13,7 +13,7 @@ UefiMain(
     Status = LogInitial(ImageHandle);
     if(EFI_ERROR(Status))
     {
-        LogError(Status);
+        Print(L"ERROR:Failed to LogInitial.\n");
     }else
     {
         LogTip("Log is good now.\n");
@@ -30,13 +30,14 @@ UefiMain(
     {
         LogTip("Video is good now.\n");
     }
-    #endif    
+    #endif
     
     Status = DrawLogo(ImageHandle);
 
     for(UINTN i = 0; i < 10; i++)
     {
         Status = DrawStep(i);
+        gBS->Stall(1000);
     }
     #ifdef LOG
     if(EFI_ERROR(Status))
@@ -44,15 +45,19 @@ UefiMain(
         LogError(Status);
     }else
     {
-        LogTip("Video is good now.\n");
+        LogTip("DrawLogo is good now.\n");
     }
     #endif
+
+    return Status; //获取FrameBufferBase
 
     EFI_FILE_PROTOCOL *Bin;
     Status = GetFileHandle(ImageHandle, L"\\Kernel.bin", &Bin);
     EFI_PHYSICAL_ADDRESS BinAddress;
     Status = ReadFile(Bin, &BinAddress);
     Status = ByeBootServices(ImageHandle);
+
+    Print(L"Kernel.bin EnterPoint:%p", BinAddress);
     asm("jmp %0": : "m"(BinAddress)); 
 
     return Status;
@@ -62,8 +67,8 @@ EFI_STATUS ByeBootServices(
     IN EFI_HANDLE ImageHandle
 )
 {
-    EFI_STATUS Status = EFI_SUCCESS;
     Print(L"\nBye BS.\n");
+    EFI_STATUS Status = EFI_SUCCESS;
     MEMORY_MAP MemMap = {4096 * 4, NULL,4096,0,0,0};
 
     Status = gBS->AllocatePool(
@@ -75,8 +80,10 @@ EFI_STATUS ByeBootServices(
     {
         Print(L"Allocate pool for memory map failed.\n");
         return Status;
-    }    
-  
+    }
+
+    Print(L"\nAllocate pool for memory map ok\n");
+
     Status = gBS->GetMemoryMap(
         &MemMap.BufferSize,
         (EFI_MEMORY_DESCRIPTOR *)MemMap.Buffer,
@@ -85,11 +92,15 @@ EFI_STATUS ByeBootServices(
         &MemMap.DescriptorVersion
     );
 
+    //Print(L"\ncall GetMemoryMap\n");
+
     if(EFI_ERROR(Status))
     {
         Print(L"Get memory map error.\n");
         return Status;
     }
+
+    //Print(L"\nGet memory map ok\n"); ???GetMemoryMap后没有Print, ByeBootServices会卡住
  
     Status = gBS->ExitBootServices(
         ImageHandle, MemMap.MapKey
@@ -100,6 +111,8 @@ EFI_STATUS ByeBootServices(
         Print(L"ExitBootServices error.\n");
         return Status;
     }
+
+    //Print(L"ExitBootServices ok.\n");
 
     return Status;
 }
