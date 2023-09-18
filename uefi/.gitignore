@@ -1,6 +1,7 @@
 NvVars
 env/hda.img
 env/edk2
+env/OVMF*.fd
 env/root2/efi/boot/*.efi
 env/root2/*.efi
 env/root2/*.BMP

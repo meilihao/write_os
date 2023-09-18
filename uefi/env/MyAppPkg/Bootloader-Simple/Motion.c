@@ -23,6 +23,8 @@ EFI_STATUS VideoInit(
     return Status;
 }
 
+// 其他显示图片的项目:
+// http://yiiyee.cn/blog/2021/08/20/uefi%E5%BC%80%E5%8F%91%E6%8E%A2%E7%B4%A296-%E6%B8%A9%E5%BA%A6%E8%AE%A1%E5%B0%8F%E6%B8%B8%E6%88%8F/
 EFI_STATUS DrawLogo(
     IN EFI_HANDLE ImageHandle
 )
@@ -45,10 +47,10 @@ EFI_STATUS DrawLogo(
     BMP_CONFIG BmpConfig;
     Status = BmpTransform(LogoAddress, &BmpConfig);
 
-    // UINTN X = (Hor - BmpConfig.Width) / 4;
-    // UINTN Y = (Ver - BmpConfig.Height) / 4;
+    UINTN X = (Hor - BmpConfig.Width) / 2;
+    UINTN Y = (Ver - BmpConfig.Height) / 2;
 
-    // Status = DrawBmp(Gop, BmpConfig, X, Y);
+    Status = DrawBmp(Gop, BmpConfig, X, Y);
     
     return Status;
 }
@@ -57,7 +59,7 @@ EFI_STATUS DrawStep(
     IN UINTN Step
 )
 {
-    Print(L"start draw step.\n");
+    //Print(L"start draw step.\n");
 
     EFI_STATUS Status = EFI_SUCCESS;
 
@@ -77,7 +79,7 @@ EFI_STATUS DrawStep(
         Print(L"ERROR:Failed to Blt Block.\n");
         return Status;
     }
-    Print(L"SUCCESS:DrawStep:%d.\n", Step);
+    //Print(L"SUCCESS:DrawStep:%d.\n", Step);
     #endif
 
     return Status;

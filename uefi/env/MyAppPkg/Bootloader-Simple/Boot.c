@@ -49,7 +49,7 @@ UefiMain(
     }
     #endif
 
-    return Status; //获取FrameBufferBase
+    //return Status; //获取FrameBufferBase
 
     EFI_FILE_PROTOCOL *Bin;
     Status = GetFileHandle(ImageHandle, L"\\Kernel.bin", &Bin);
@@ -58,7 +58,7 @@ UefiMain(
     Status = ByeBootServices(ImageHandle);
 
     Print(L"Kernel.bin EnterPoint:%p", BinAddress);
-    asm("jmp %0": : "m"(BinAddress)); 
+    asm("jmp *%0": : "m"(BinAddress)); 
 
     return Status;
 }
@@ -67,6 +67,7 @@ EFI_STATUS ByeBootServices(
     IN EFI_HANDLE ImageHandle
 )
 {
+    // 获取GetMemoryMap
     Print(L"\nBye BS.\n");
     EFI_STATUS Status = EFI_SUCCESS;
     MEMORY_MAP MemMap = {4096 * 4, NULL,4096,0,0,0};
@@ -92,7 +93,7 @@ EFI_STATUS ByeBootServices(
         &MemMap.DescriptorVersion
     );
 
-    //Print(L"\ncall GetMemoryMap\n");
+    Print(L"\ncall GetMemoryMap\n");
 
     if(EFI_ERROR(Status))
     {
@@ -100,7 +101,7 @@ EFI_STATUS ByeBootServices(
         return Status;
     }
 
-    //Print(L"\nGet memory map ok\n"); ???GetMemoryMap后没有Print, ByeBootServices会卡住
+    //Print(L"\nGet memory map ok\n"); ???GetMemoryMap后没有Print, ByeBootServices会卡住. 用自编译edk2-stable202308遇到同样问题
  
     Status = gBS->ExitBootServices(
         ImageHandle, MemMap.MapKey

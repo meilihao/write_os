@@ -12,4 +12,14 @@ from: https://gitee.com/tanyugang/UEFI/tree/main/%E7%AC%AC11%E8%AF%9D
     # qemu-system-x86_64 -bios /usr/share/qemu/OVMF.fd -drive format=raw,file=fat:rw:root2 -net none
     ```
 
-在uefi shell 执行Bootloader.efi, 效果: 全屏蓝色, 未成功???
+在uefi shell 执行Bootloader.efi, 效果: 全屏蓝色, 未成功, 但在GetMemoryMap后加Print就能成功???
+
+## FAQ
+### bmp
+```
+# convert 16.webp -alpha set -define bmp:format=bmp3 -define bmp3:alpha=true test.bmp # bits offset 54
+# file test.bmp 
+test.bmp: PC bitmap, Windows 3.x format, 240 x 240 x 32, image size 230400, cbSize 230454, bits offset 54
+```
+
+注意图片格式, 有的bmp图片格式有其他处理. 当前项目需使用**image size=cbSize-54**的bmp图片, 推荐使用上述命令生成bmp.

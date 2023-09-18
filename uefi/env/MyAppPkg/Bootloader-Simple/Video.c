@@ -261,9 +261,10 @@ EFI_STATUS BmpTransform(
     const UINTN Width  = BmpConfig->Width;
     for (UINTN i = 0; i < Height / 2; i++) {
         if (i%50==0){
-            Print(L"Bmp  memswap= %d,%d\n", i, Height / 2);
+            Print(L"Bmp  memswap2= %d,%d\n", i, Height / 2);
         }
-        memswap(
+        // memswap也是同样效果
+        memswap2(
             PixelBuffer + i * Width,
             PixelBuffer + (Height - i - 1) * Width,
             Width * sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
