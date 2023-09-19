@@ -14,6 +14,9 @@ from: https://gitee.com/tanyugang/UEFI/tree/main/%E7%AC%AC11%E8%AF%9D
 
 在uefi shell 执行Bootloader.efi, 效果: 全屏蓝色, 未成功, 但在GetMemoryMap后加Print就能成功???
 
+## 改进
+- [SimpleUefiLog](https://www.jianshu.com/p/9ae9c24d08ec)
+
 ## FAQ
 ### bmp
 ```

@@ -85,7 +85,7 @@ EFI_STATUS ByeBootServices(
 
     Print(L"\nAllocate pool for memory map ok\n");
 
-    Status = gBS->GetMemoryMap(
+    Status = gBS->GetMemoryMap( // for ExitBootServices's MapKey
         &MemMap.BufferSize,
         (EFI_MEMORY_DESCRIPTOR *)MemMap.Buffer,
         &MemMap.MapKey,

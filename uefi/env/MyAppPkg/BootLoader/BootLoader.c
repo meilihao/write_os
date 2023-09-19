@@ -52,9 +52,9 @@ struct KERNEL_BOOT_PARAMETER_INFORMATION
 
 EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *SystemTable)
 {
-	EFI_LOADED_IMAGE        *LoadedImage;
-	EFI_FILE_IO_INTERFACE   *Vol;
-	EFI_FILE_HANDLE         RootFs;
+	EFI_LOADED_IMAGE        *LoadedImage; // 加载的image信息
+	EFI_FILE_IO_INTERFACE   *Vol; // 可理解为存储设备上的分区
+	EFI_FILE_HANDLE         RootFs; //指向所打开的卷的根目录的指针
 	EFI_FILE_HANDLE         FileHandle;
 
 	int i = 0;
@@ -62,7 +62,7 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	EFI_STATUS status = EFI_SUCCESS;
 	struct KERNEL_BOOT_PARAMETER_INFORMATION *kernel_boot_para_info = NULL;
 
-//////////////////////
+////////////////////// loader kernel
 	gBS->HandleProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,(VOID*)&LoadedImage);
 	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiSimpleFileSystemProtocolGuid,(VOID*)&Vol);
 	Vol->OpenVolume(Vol,&RootFs);
@@ -75,14 +75,14 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 
 	EFI_FILE_INFO* FileInfo;
 	UINTN BufferSize = 0;
-	EFI_PHYSICAL_ADDRESS pages = 0x100000;
+	EFI_PHYSICAL_ADDRESS pages = 0x100000; // 1MB
 
 	BufferSize = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 100;
 	gBS->AllocatePool(EfiRuntimeServicesData,BufferSize,(VOID**)&FileInfo); 
 	FileHandle->GetInfo(FileHandle,&gEfiFileInfoGuid,&BufferSize,FileInfo);
 	Print(L"\tFileName:%s\t Size:%d\t FileSize:%d\t Physical Size:%d\n",FileInfo->FileName,FileInfo->Size,FileInfo->FileSize,FileInfo->PhysicalSize);
 
-	gBS->AllocatePages(AllocateAddress,EfiLoaderData,(FileInfo->FileSize + 0x1000 - 1) / 0x1000,&pages);
+	gBS->AllocatePages(AllocateAddress,EfiLoaderData,(FileInfo->FileSize + 0x1000 - 1) / 0x1000,&pages); // 0x1000=4k, 分配的首地址
 	Print(L"Read Kernel File to Memory Address:%018lx\n",pages);
 	BufferSize = FileInfo->FileSize;
 	FileHandle->Read(FileHandle,&BufferSize,(VOID*)pages);
@@ -90,20 +90,20 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	FileHandle->Close(FileHandle);
 	RootFs->Close(RootFs);
 
-///////////////////
+/////////////////// 初始化kernel_boot_para_info + 设置显示器mode & map Graphics FrameBufferBase
 	EFI_GRAPHICS_OUTPUT_PROTOCOL* gGraphicsOutput = 0;
 	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* Info = 0;
 	UINTN InfoSize = 0;
 
-	pages = 0x60000;
-	kernel_boot_para_info = (struct KERNEL_BOOT_PARAMETER_INFORMATION *)0x60000;
+	pages = 0x60000; // 144k [Memory Map (x86)](https://wiki.osdev.org/Memory_Map_(x86))
+	kernel_boot_para_info = (struct KERNEL_BOOT_PARAMETER_INFORMATION *)0x60000; //给kernel传递参数
 	gBS->AllocatePages(AllocateAddress,EfiLoaderData,1,&pages);
-	gBS->SetMem((void*)kernel_boot_para_info,0x1000,0);
+	gBS->SetMem((void*)kernel_boot_para_info,0x1000,0); //初始化
 
 	gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid,NULL,(VOID **)&gGraphicsOutput);
 
 	long H_V_Resolution = gGraphicsOutput->Mode->Info->HorizontalResolution * gGraphicsOutput->Mode->Info->VerticalResolution;
-	int MaxResolutionMode = gGraphicsOutput->Mode->Mode;
+	int MaxResolutionMode = gGraphicsOutput->Mode->Mode; // 获取到的最大分辨率
 
 	for(i = 0;i < gGraphicsOutput->Mode->MaxMode;i++)
 	{
@@ -127,32 +127,33 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	kernel_boot_para_info->Graphics_Info.FrameBufferSize = gGraphicsOutput->Mode->FrameBufferSize;
 
 	Print(L"Map Graphics FrameBufferBase to Virtual Address 0xffff800003000000\n");
-	long * PageTableEntry = (long *)0x103000;
+	// 需要配合head.S理解, 使用0x200000=2^21=2MB物理页, 即设置gGraphicsOutput FrameBuffer的页表
+	long * PageTableEntry = (long *)0x103000; // 1M+12k
 	for(i = 0;i < (gGraphicsOutput->Mode->FrameBufferSize + 0x200000 - 1) >> 21;i++)	// map to virtual address 0xffff800003000000
 	{
 		*(PageTableEntry + 24 + i) = gGraphicsOutput->Mode->FrameBufferBase | 0x200000 * i | 0x87;
 		Print(L"Page %02d,Address:%018lx,Value:%018lx\n",i,(long)(PageTableEntry + 24 + i),*(PageTableEntry + 24 + i));
 	}
 
-///////////////////////////
+/////////////////////////// 获取内存map
 	struct EFI_E820_MEMORY_DESCRIPTOR *E820p = kernel_boot_para_info->E820_Info.E820_Entry;
 	struct EFI_E820_MEMORY_DESCRIPTOR *LastE820 = NULL;
 	unsigned long LastEndAddr = 0;
 	int E820Count = 0;
 
-	UINTN MemMapSize = 0;
+	UINTN MemMapSize = 0; // 存放mem map buffer大小
 	EFI_MEMORY_DESCRIPTOR* MemMap = 0;
 	UINTN MapKey = 0;
-	UINTN DescriptorSize = 0;
+	UINTN DescriptorSize = 0; // 每个mem map描述符大小
 	UINT32 DesVersion = 0;
 
 	gBS->GetMemoryMap(&MemMapSize,MemMap,&MapKey,&DescriptorSize,&DesVersion);
 	MemMapSize += DescriptorSize * 5;
 	gBS->AllocatePool(EfiRuntimeServicesData,MemMapSize,(VOID**)&MemMap);
-	Print(L"Get MemMapSize:%d,DescriptorSize:%d,count:%d\n",MemMapSize,DescriptorSize,MemMapSize/DescriptorSize);
+	Print(L"Get MemMapSize:%d,MapKey:%d,DescriptorSize:%d,count:%d\n",MemMapSize,MapKey,DescriptorSize,MemMapSize/DescriptorSize);
 	gBS->SetMem((void*)MemMap,MemMapSize,0);
 	status = gBS->GetMemoryMap(&MemMapSize,MemMap,&MapKey,&DescriptorSize,&DesVersion);
-	Print(L"Get MemMapSize:%d,DescriptorSize:%d,count:%d\n",MemMapSize,DescriptorSize,MemMapSize/DescriptorSize);
+	Print(L"Get MemMapSize:%d,MapKey:%d,DescriptorSize:%d,count:%d\n",MemMapSize,MapKey,DescriptorSize,MemMapSize/DescriptorSize); // MemMapSize可能和上面GetMemoryMap获取的不一样
 	if(EFI_ERROR(status))
 		Print(L"status:%018lx\n",status);
 
@@ -211,7 +212,7 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 			E820p->address = MMap->PhysicalStart;
 			E820p->length = MMap->NumberOfPages << 12;
 			E820p->type = MemType;
-			LastEndAddr = MMap->PhysicalStart + (MMap->NumberOfPages << 12);
+			LastEndAddr = MMap->PhysicalStart + (MMap->NumberOfPages << 12); // PhysicalStart + NumberOfPages *4k
 			LastE820 = E820p;
 			E820p++;
 			E820Count++;			
@@ -219,11 +220,12 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	}
 
 	kernel_boot_para_info->E820_Info.E820_Entry_count = E820Count;
-	LastE820 = kernel_boot_para_info->E820_Info.E820_Entry;
+	LastE820 = kernel_boot_para_info->E820_Info.E820_Entry; // E820_Entry is first E820p
+	// sort E820_Info: 升序
 	int j = 0;
 	for(i = 0; i< E820Count; i++)
 	{
-		struct EFI_E820_MEMORY_DESCRIPTOR* e820i = LastE820 + i;
+		struct EFI_E820_MEMORY_DESCRIPTOR* e820i = LastE820 + i; // LastE820 + i*sizeof(EFI_E820_MEMORY_DESCRIPTOR), 编译器会自动处理地址相加(类似`LastE820++`)???
 		struct EFI_E820_MEMORY_DESCRIPTOR MemMap;
 		for(j = i + 1; j< E820Count; j++)
 		{
@@ -246,21 +248,24 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	gBS->FreePool(MemMap);
 
 	Print(L"Call ExitBootServices And Jmp to Kernel.\n");
-	gBS->GetMemoryMap(&MemMapSize,MemMap,&MapKey,&DescriptorSize,&DesVersion);
+	gBS->GetMemoryMap(&MemMapSize,MemMap,&MapKey,&DescriptorSize,&DesVersion); // for ExitBootServices's MapKey ???
+	Print(L"Get MemMapSize:%d,MapKey:%d,DescriptorSize:%d,count:%d\n",MemMapSize,MapKey,DescriptorSize,MemMapSize/DescriptorSize); // 本代码三次调用GetMemoryMap, 返回的MemMapSize和MapKey都不同, 推测与中间调用了内存分配有关, 比如AllocatePool,FreePool
 
 	gBS->CloseProtocol(LoadedImage->DeviceHandle,&gEfiSimpleFileSystemProtocolGuid,ImageHandle,NULL);
 	gBS->CloseProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,ImageHandle,NULL);
 
 	gBS->CloseProtocol(gGraphicsOutput,&gEfiGraphicsOutputProtocolGuid,ImageHandle,NULL);
 
-/////////////////////
+	return EFI_SUCCESS; // for debug
+
+///////////////////// 退出ExitBootServices + 开始执行kernel
 	status = gBS->ExitBootServices(ImageHandle,MapKey);
 	if(EFI_ERROR(status))
 	{
 		Print(L"ExitBootServices: Failed, Memory Map has Changed.\n");
 		return EFI_INVALID_PARAMETER;
 	}
-	func = (void *)0x100000;
+	func = (void *)0x100000; // kernel.bin的地址
 	func();
 
 	return EFI_SUCCESS;
