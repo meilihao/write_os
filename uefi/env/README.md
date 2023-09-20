@@ -21,7 +21,7 @@ ref:
 ```bash
 mkdir -p root2/efi/boot
 cp /usr/lib/grub/x86_64-efi/monolithic/grubx64.efi root2/efi/boot/bootx64.efi # 模拟cd, 硬盘启动的路径是`boot/efi`
-qemu-system-x86_64 -bios /usr/share/qemu/OVMF.fd -drive format=raw,file=fat:rw:root2 -net none [-serial stdio] # `-serial stdio`需要构建ovmf时添加`-D DEBUG_ON_SERIAL_PORT`
+qemu-system-x86_64 -machine q35 -bios /usr/share/qemu/OVMF.fd -drive format=raw,file=fat:rw:root2 -net none [-serial stdio] # `-serial stdio`需要构建ovmf时添加`-D DEBUG_ON_SERIAL_PORT`
 ```
 
 ### disk

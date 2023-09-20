@@ -27,3 +27,15 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	return EFI_SUCCESS;
 }
 
+内存类型:
+- reserved: Reserved memory
+- LoaderCode: Loader code
+- LoaderData: Loader data
+- BS_code: Boot service code
+- BS_data: Boot service data
+
+	BS_code, BS_data可能很多, 每块占用不大, 在ExitBootServices后会回收
+- RT_data: Runtime data
+- `ACPI_*`: acpi
+- mmio
+- available: Available memory
