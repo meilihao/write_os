@@ -10,6 +10,9 @@ ref:
 
 edk2环境设置见`programming-interface/arch/uefi.md`.
 
+## 构建
+直接`cd edk2`下去构建. 之前为edk2建立软连接xxx再`cd xxx`下构建报错
+
 ## 测试
 ### fs
 ref:
