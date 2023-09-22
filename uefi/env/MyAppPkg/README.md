@@ -4,7 +4,7 @@
 ## build
 ```bash
 cd edk2
-build -p OvmfPkg/OvmfPkgX64.dsc -a X64 -D DEBUG_ON_SERIAL_PORT # ??? 自己编译的ovmf固件无法启动QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.13) + edk2-stable202308, 串口日志报`Broken CPU hotplug register block found`. 使用qemu自带的ovmf固件正常
+build -p OvmfPkg/OvmfPkgX64.dsc -a X64 -D DEBUG_ON_SERIAL_PORT -D DEBUG_LINE_NUMBER # ??? 自己编译的ovmf固件无法启动QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.13) + edk2-stable202308, 串口日志报`Broken CPU hotplug register block found`. 使用qemu自带的ovmf固件正常; DEBUG_LINE_NUMBER没效果
 cp Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd ..
 cd MyAppPkg
 build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
