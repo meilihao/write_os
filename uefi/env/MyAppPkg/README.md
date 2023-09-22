@@ -1,4 +1,5 @@
 # README
+**部分编译错误(no space)需要删除Build重新build, 否则再次build可能报错**
 
 ## build
 ```bash
