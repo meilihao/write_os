@@ -1,4 +1,3 @@
-// [Elf64 格式-Linux 内核揭密](https://www.cntofu.com/book/114/Theory/ELF.md)
 #ifndef ELF_H_
 #define ELF_H_
 #include <stdint.h>

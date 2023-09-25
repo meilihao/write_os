@@ -1,13 +1,13 @@
 [Defines]
-  PLATFORM_NAME                   = xv6-64_loader
-  PLATFORM_GUID                   = a3b2f829-f9c4-4261-b8e2-69ff6fbd1b46
+  PLATFORM_NAME                   = xv6_bootloader
+  PLATFORM_GUID                   = ea34b8fd-98a5-42ed-a1a4-6c152364377b
   PLATFORM_VERSION                = 0.1
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = bootloader/build
+  OUTPUT_DIRECTORY               = xv6_bootloader/build
   SUPPORTED_ARCHITECTURES        = X64
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
 
-  DEFINE DEBUG_ENABLE_OUTPUT     = TRUE
+DEFINE DEBUG_ENABLE_OUTPUT     = TRUE
 
 [LibraryClasses]
   # Entry point
@@ -33,5 +33,5 @@
   RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
 [Components]
-  bootloader/xv6-64_loader.inf
+  xv6_bootloader/loader.inf
 

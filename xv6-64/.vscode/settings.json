@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.bin": "c",
+        "font.h": "c"
+    }
+}

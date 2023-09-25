@@ -1,6 +1,8 @@
 # README
 [xv6-64](https://github.com/naoki9911/xv6-64) @ `60430e8 on Apr 24, 2019`
 
+xv6-64仅包含bootloader+启动输出调试信息部分, 完整项目请阅读[xv6-64](https://github.com/naoki9911/xv6_uefi)(是32位).
+
 ## 构建
 ```bash
 # mkdir -p image/EFI/BOOT
