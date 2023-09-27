@@ -44,7 +44,7 @@ typedef struct {
 	Elf32_Half e_machine; // arch类型, 3=EM_386
 	Elf32_Word e_version; // elf文件版本
 	Elf32_Addr e_entry; //执行入口, 没有时为0
-	Elf32_Off  e_phoff; // program header table的offset，如果文件没有PH，这个值是0
+	Elf32_Off  e_phoff; // program header table的offset，如果文件没有PH，这个值是0. Program headers table 就是作为所有 Segments 的头信息，用来描述所有的 Segments 的
 	Elf32_Off  e_shoff; // section header table 的offset，如果文件没有SH，这个值是0
 	Elf32_Word e_flags; // 特定于处理器的标志，32位和64位Intel架构都没有定义标志，因此eflags的值是0
 	Elf32_Half e_ehsize; // ELF header的大小，32位ELF是52字节，64位是64字节

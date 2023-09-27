@@ -78,5 +78,46 @@ extern struct gpu gpu;
 #endif
 ```
 
+### kernelmemfs LOAD PhysAddr=0x8010acf6
+```
+# readelf -l kernelmemfs
+
+Elf file type is EXEC (Executable file)
+Entry point 0x100010
+There are 3 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x001000 0x80100000 0x00100000 0x0acf6 0x0acf6 R E 0x1000
+  LOAD           0x00bcf6 0x8010acf6 0x8010acf6 0x7f84c 0x8a84a RW  0x1000
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x10
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .text .rodata
+   01     .stab .stabstr .data .bss
+   02
+# readelf -S kernelmemfs
+There are 19 section headers, starting at offset 0xb8f5c:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        80100000 001000 008a23 00  AX  0   0 16
+  [ 2] .rodata           PROGBITS        80108a40 009a40 0022b6 00   A  0   0 32
+  [ 3] .stab             PROGBITS        8010acf6 00bcf6 000001 0c  WA  4   0  1
+  [ 4] .stabstr          STRTAB          8010acf7 00bcf7 000001 00  WA  0   0  1
+  [ 5] .data             PROGBITS        8010b000 00c000 07f542 00  WA  0   0 4096
+  [ 6] .bss              NOBITS          8018a560 08b542 00afe0 00  WA  0   0 32
+....
+```
+
+`LOAD PhysAddr=0x8010acf6`导致bootloader RelocateELF报错
+
+根据`Section to Segment mapping`, `01 LOAD`是`.stab .stabstr .data .bss`, 结合`Section header table`可获得各session的布局.
+
+用了xv6_uefi's xv6_public fork的0754d21c865e97582968fa5d155eac133e5829b0版, 该LOAD的PhysAddr是0x8010798e, 但`mit-pdos/xv6-public@eeb7b41`是0x00108000.
+
+推测问题处在ld时, 对比xv6-public 0754d21c和eeb7b41的kernel.ld, 找到差异[Remove BYTE directives from kernel linker script to fix triple fault on boot](https://github.com/mit-pdos/xv6-public/commit/1db17ac1fdb70cd98dfc49d50e89f8abcff9a092), 修正kernel.ld后, 该LOAD的PhysAddr是0x0010b000.
 
 

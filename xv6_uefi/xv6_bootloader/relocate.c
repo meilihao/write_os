@@ -16,7 +16,7 @@
 // Phdr Address:6216034
 // Start Address:100000
 // End Address:108000
-// Start Address:8010798E ??? xv6@lastes is 0x00108000, 通过`ld -Map=output.map`发现是entry.S导致
+// Start Address:8010798E ??? xv6@lastes is 0x00108000
 // End Address:80193000
 // Allocate Start Address:100000
 // Allocate End Address:80193000
