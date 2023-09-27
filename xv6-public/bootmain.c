@@ -63,12 +63,13 @@ waitdisk(void)
 
 // Read a single sector at offset into dst.
 // 读取扇区内容到dst
+// [  第一节 读写IDE设备](https://www.askpure.com/course_U9FD8SB9-G9T99WXM-3RULAGMG-HH8I7UTF.html)
 void
 readsect(void *dst, uint offset)
 {
   // Issue command.
   // use LBA28
-  // 0x1F6 的高四位表示LAB模式，0xE0 = 0x1110000. 高四位中除了最后一个bit全部为1，最后一个bit为0表示是从盘（因为主盘是 xv6.img，这里读取的磁盘是 fs.img）
+  // 0x1F6 的高四位表示LAB模式，0xE0 = 0x1110000. 高四位中除了最后一个bit全部为1，最后一个bit为0表示是主盘（因为主盘是 xv6.img，从盘是 fs.img）
   waitdisk();
   outb(0x1F2, 1);   // count = 1
   outb(0x1F3, offset);

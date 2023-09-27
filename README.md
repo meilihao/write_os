@@ -26,6 +26,7 @@
 - [从零开始写 OS 内核](https://segmentfault.com/a/1190000040124650)
 - [xbook2](https://github.com/hzcx998/xbook2)
 - **xv6**
+- [跟我一起写操作系统](https://www.askpure.com/course_KH3775IW-COUS3DX1-1Y2VUM3Q-CE78MA15.html)
 
 ## ref
 - [x86汇编语言](https://www.jianshu.com/p/7f63e62e0ffd)
