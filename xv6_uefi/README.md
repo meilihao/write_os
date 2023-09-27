@@ -45,7 +45,7 @@ acpica
 # qemu-system-x86_64 -machine q35 -bios /usr/share/qemu/OVMF.fd -drive format=raw,file=fat:rw:image -net none -serial stdio
 ```
 
-实测: 显示logo时花屏并重启
+实测: 显示logo时花屏, 再输出`Starting XV6_UEFI`和PCI Device信息后重启了.
 
 ## FAQ
 ### `make kernelmemfs`报`ld: vm.o:.../xv6_public-633b564fadae93e054fe038cba5febc77ce160f0/graphic.h:34: multiple definition of `gpu'; console.o:.../xv6_public-633b564fadae93e054fe038cba5febc77ce160f0/graphic.h:34: first defined here`
@@ -116,7 +116,7 @@ Section Headers:
 
 根据`Section to Segment mapping`, `01 LOAD`是`.stab .stabstr .data .bss`, 结合`Section header table`可获得各session的布局.
 
-用了xv6_uefi's xv6_public fork的0754d21c865e97582968fa5d155eac133e5829b0版, 该LOAD的PhysAddr是0x8010798e, 但`mit-pdos/xv6-public@eeb7b41`是0x00108000.
+用了xv6_uefi's xv6_public fork的初始0754d21c865e97582968fa5d155eac133e5829b0版, 该LOAD的PhysAddr是0x8010798e, 但`mit-pdos/xv6-public@eeb7b41`是0x00108000.
 
 推测问题处在ld时, 对比xv6-public 0754d21c和eeb7b41的kernel.ld, 找到差异[Remove BYTE directives from kernel linker script to fix triple fault on boot](https://github.com/mit-pdos/xv6-public/commit/1db17ac1fdb70cd98dfc49d50e89f8abcff9a092), 修正kernel.ld后, 该LOAD的PhysAddr是0x0010b000.
 
