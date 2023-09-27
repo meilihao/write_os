@@ -31,6 +31,6 @@ void graphic_draw_box();
 void graphic_draw_pixel(int x,int y,struct graphic_pixel *);
 void graphic_scroll_up(int height);
 
-struct gpu gpu;
+extern struct gpu gpu;
 
 #endif

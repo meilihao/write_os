@@ -2,6 +2,9 @@
 #include "mp_uefi.h"
 #include "memlayout.h"
 #include "defs.h"
+
+struct gpu gpu;
+
 /*
  * i%4 = 0 : blue
  * i%4 = 1 : green
