@@ -14,6 +14,7 @@
 
 void readseg(uchar*, uint, uint);
 
+//将内核的ELF文件从硬盘加载进内存，并将控制权转给内核程序
 void
 bootmain(void)
 {
@@ -32,8 +33,8 @@ bootmain(void)
     return;  // let bootasm.S handle error
 
   // Load each program segment (ignores ph flags).
-  ph = (struct proghdr*)((uchar*)elf + elf->phoff);
-  eph = ph + elf->phnum;
+  ph = (struct proghdr*)((uchar*)elf + elf->phoff); // pht起始地址
+  eph = ph + elf->phnum; // pht结束地址
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
     readseg(pa, ph->filesz, ph->off);
@@ -86,6 +87,7 @@ readseg(uchar* pa, uint count, uint offset)
   pa -= offset % SECTSIZE;
 
   // Translate from bytes to sectors; kernel starts at sector 1.
+  // 读取的起始扇区
   offset = (offset / SECTSIZE) + 1;
 
   // If this is too slow, we could read lots of sectors at a time.

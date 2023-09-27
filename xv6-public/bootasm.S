@@ -20,12 +20,14 @@ start:
 
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
+  # 不过某些BIOS, 包括模拟器（qemu, Bochs等）会默认打开A20地址线, 不需要手动开启
+  # 这里是通过键盘控制器的8042芯片开启A20
 seta20.1:
-  inb     $0x64,%al               # Wait for not busy
+  inb     $0x64,%al               # Wait for not busy # 等待直到键盘不忙, 取0x64端口(Status Register)状态值
   testb   $0x2,%al
   jnz     seta20.1
 
-  movb    $0xd1,%al               # 0xd1 -> port 0x64
+  movb    $0xd1,%al               # 0xd1 -> port 0x64 # d1=向8042端口的P2写数据
   outb    %al,$0x64
 
 seta20.2:
@@ -33,7 +35,7 @@ seta20.2:
   testb   $0x2,%al
   jnz     seta20.2
 
-  movb    $0xdf,%al               # 0xdf -> port 0x60
+  movb    $0xdf,%al               # 0xdf -> port 0x60 # DF为11011111, A20位置1, 开启A20线; 0x60=input/output buffer
   outb    %al,$0x60
 
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
@@ -48,7 +50,7 @@ seta20.2:
   # Complete the transition to 32-bit protected mode by using a long jmp
   # to reload %cs and %eip.  The segment descriptors are set up with no
   # translation, so that the mapping is still the identity mapping.
-  ljmp    $(SEG_KCODE<<3), $start32
+  ljmp    $(SEG_KCODE<<3), $start32 # SEG_KCODE from mmu.h
 
 .code32  # Tell assembler to generate 32-bit code now.
 start32:
@@ -62,7 +64,7 @@ start32:
   movw    %ax, %gs                # -> GS
 
   # Set up the stack pointer and call into C.
-  movl    $start, %esp
+  movl    $start, %esp # esp = 0x7C00
   call    bootmain
 
   # If bootmain returns (it shouldn't), trigger a Bochs
@@ -79,7 +81,7 @@ spin:
 .p2align 2                                # force 4 byte alignment
 gdt:
   SEG_NULLASM                             # null seg
-  SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg
+  SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg 0xffffffff=4G
   SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
 
 gdtdesc:

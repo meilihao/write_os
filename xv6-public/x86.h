@@ -39,6 +39,7 @@ outsl(int port, const void *addr, int cnt)
                "cc");
 }
 
+// addr: start addr
 static inline void
 stosb(void *addr, int data, int cnt)
 {
