@@ -9,6 +9,7 @@ inb(ushort port)
   return data;
 }
 
+// 每次读4B
 static inline void
 insl(int port, void *addr, int cnt)
 {

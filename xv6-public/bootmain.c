@@ -26,6 +26,7 @@ bootmain(void)
   elf = (struct elfhdr*)0x10000;  // scratch space, 64k
 
   // Read 1st page off disk
+  // ELF 头不会超过4k
   readseg((uchar*)elf, 4096, 0);
 
   // Is this an ELF executable?
@@ -33,6 +34,7 @@ bootmain(void)
     return;  // let bootasm.S handle error
 
   // Load each program segment (ignores ph flags).
+  // 拷贝段到物理地址 phoff
   ph = (struct proghdr*)((uchar*)elf + elf->phoff); // pht起始地址
   eph = ph + elf->phnum; // pht结束地址
   for(; ph < eph; ph++){
@@ -52,15 +54,21 @@ void
 waitdisk(void)
 {
   // Wait for disk ready.
+  // inb 表示读取硬件的端口，0x1F7 读操作时作为状态寄存器，这是一个8位寄存器，第7个bit表示的是 DRDY 位，表示磁盘就行，检测正常可以执行命令。第8个bit表示的是 BSY 位，表示磁盘是否繁忙
+  // 0xC0=1100 0000
+  // 0x40=0100 0000
   while((inb(0x1F7) & 0xC0) != 0x40)
     ;
 }
 
 // Read a single sector at offset into dst.
+// 读取扇区内容到dst
 void
 readsect(void *dst, uint offset)
 {
   // Issue command.
+  // use LBA28
+  // 0x1F6 的高四位表示LAB模式，0xE0 = 0x1110000. 高四位中除了最后一个bit全部为1，最后一个bit为0表示是从盘（因为主盘是 xv6.img，这里读取的磁盘是 fs.img）
   waitdisk();
   outb(0x1F2, 1);   // count = 1
   outb(0x1F3, offset);
@@ -81,9 +89,10 @@ readseg(uchar* pa, uint count, uint offset)
 {
   uchar* epa;
 
-  epa = pa + count;
+  epa = pa + count; // 内存中的终止地址
 
   // Round down to sector boundary.
+  // 让物理地址内存对齐, 这样方便加载, pa 就一定是扇区大小的倍数
   pa -= offset % SECTSIZE;
 
   // Translate from bytes to sectors; kernel starts at sector 1.
