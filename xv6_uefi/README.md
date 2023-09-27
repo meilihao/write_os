@@ -118,6 +118,6 @@ Section Headers:
 
 用了xv6_uefi's xv6_public fork的初始0754d21c865e97582968fa5d155eac133e5829b0版, 该LOAD的PhysAddr是0x8010798e, 但`mit-pdos/xv6-public@eeb7b41`是0x00108000.
 
-推测问题处在ld时, 对比xv6-public 0754d21c和eeb7b41的kernel.ld, 找到差异[Remove BYTE directives from kernel linker script to fix triple fault on boot](https://github.com/mit-pdos/xv6-public/commit/1db17ac1fdb70cd98dfc49d50e89f8abcff9a092), 修正kernel.ld后, 该LOAD的PhysAddr是0x0010b000.
+推测问题处在ld时, 对比xv6-public 0754d21c和eeb7b41的kernel.ld, 找到差异[Remove BYTE directives from kernel linker script to fix triple fault on boot](https://github.com/mit-pdos/xv6-public/pull/115), 修正kernel.ld后, 该LOAD的PhysAddr是0x0010b000.
 
 
