@@ -41,11 +41,23 @@ const CHAR16 *GetMemoryType(EFI_MEMORY_TYPE Type) {
 EFI_STATUS GetMemoryMapFile(){
   EFI_STATUS Status;
   struct MemoryMap MemoryMap = {0,NULL,0,0,0,0};
-  
-  MemoryMap.BufferSize = MEM_MAP_SIZE;
-  MemoryMap.MapSize = MEM_MAP_SIZE;
 
-  Status = gBS->AllocatePool(EfiLoaderData,MEM_MAP_SIZE,&MemoryMap.Buffer);
+  Status = gBS->GetMemoryMap(
+      &MemoryMap.MapSize,
+      (EFI_MEMORY_DESCRIPTOR*)MemoryMap.Buffer,
+      &MemoryMap.MapKey,
+      &MemoryMap.DescriptorSize,
+      &MemoryMap.DescriptorVersion);
+  if(Status != EFI_BUFFER_TOO_SMALL){
+    Print(L"First Call GetMemoryMap Failed: %d\n", Status);
+    return Status;
+  }
+
+  Print(L"GetMemoryMap MapSize: %d\n", MemoryMap.MapSize);
+
+  MemoryMap.MapSize += sizeof(EFI_MEMORY_DESCRIPTOR) * 20; // 申请内存会导致MemoryMap有变化，所以多申请一些
+
+  Status = gBS->AllocatePool(EfiLoaderData,MemoryMap.MapSize,&MemoryMap.Buffer);
   if(EFI_ERROR(Status)){
     Print(L"Can not Allocate Memory Map Buffer\n");
     return Status;
@@ -58,10 +70,12 @@ EFI_STATUS GetMemoryMapFile(){
       &MemoryMap.DescriptorSize,
       &MemoryMap.DescriptorVersion);
 
-  if(Status == EFI_BUFFER_TOO_SMALL){
-    Print(L"Memory Map Buffer is too small\n");
+  if(EFI_ERROR(Status)) {
+    Print(L"Second Call GetMemoryMap Failed: %d\n", Status);
     return Status;
   }
+
+  Print(L"GetMemoryMap MapSize: %d\n", MemoryMap.MapSize);
   
   EFI_FILE_PROTOCOL *Root;
   EFI_FILE_PROTOCOL *File;

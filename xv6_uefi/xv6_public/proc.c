@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "debug.h"
 
 struct {
   struct spinlock lock;
@@ -39,15 +40,17 @@ mycpu(void)
 {
   int apicid, i;
   
-  if(readeflags()&FL_IF)
+  if(readeflags()&FL_IF){
     panic("mycpu called with interrupts enabled\n");
-  
+  }
+
   apicid = lapicid();
   // APIC IDs are not guaranteed to be contiguous. Maybe we should have
   // a reverse map, or reserve a register to store &cpus[i].
   for (i = 0; i < ncpu; ++i) {
-    if (cpus[i].apicid == apicid)
+    if (cpus[i].apicid == apicid){
       return &cpus[i];
+    }
   }
   panic("unknown apicid\n");
 }
@@ -79,8 +82,9 @@ allocproc(void)
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == UNUSED)
+    if(p->state == UNUSED){
       goto found;
+    }
 
   release(&ptable.lock);
   return 0;
@@ -90,6 +94,7 @@ found:
   p->pid = nextpid++;
 
   release(&ptable.lock);
+
 
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
@@ -126,8 +131,9 @@ userinit(void)
   p = allocproc();
   
   initproc = p;
-  if((p->pgdir = setupkvm()) == 0)
+  if((p->pgdir = setupkvm()) == 0){
     panic("userinit: out of memory?");
+  }
   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
   p->sz = PGSIZE;
   memset(p->tf, 0, sizeof(*p->tf));

@@ -3,7 +3,7 @@
   PLATFORM_GUID                   = ea34b8fd-98a5-42ed-a1a4-6c152364377b
   PLATFORM_VERSION                = 0.1
   DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = xv6_bootloader/build
+  #OUTPUT_DIRECTORY               = xv6_bootloader/build
   SUPPORTED_ARCHITECTURES        = X64
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
 

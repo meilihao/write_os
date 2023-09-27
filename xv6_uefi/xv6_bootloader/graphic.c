@@ -147,6 +147,7 @@ EFI_STATUS DrawBMP(CHAR16 *file_name,struct graphic_config *graphic_config) {
     UINTN y = graphic_config->vertical_resolution-1-i/graphic_config->horizontal_resolution;
     graphic_draw_pixel(x,y,(bmp_addr + i*3),graphic_config);
   }
+  Print(L"Draw BMP Done");
   return Status;
 }
 

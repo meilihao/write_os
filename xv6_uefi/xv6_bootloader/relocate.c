@@ -12,6 +12,17 @@
 #include "relocate.h"
 #include "file_loader.h"
 
+// Ehdr Address:6216000
+// Phdr Address:6216034
+// Start Address:100000
+// End Address:108000
+// Start Address:8010798E ??? xv6@lastes is 0x00108000, 通过`ld -Map=output.map`发现是entry.S导致
+// End Address:80193000
+// Allocate Start Address:100000
+// Allocate End Address:80193000
+// Entry Address:10000C
+// AllocatePages=524436 // 需要2G空间, qemu默认是128
+// Could not allocate pages at 07F105E0, error: 14
 EFI_STATUS RelocateELF(CHAR16* KernelPath, EFI_PHYSICAL_ADDRESS* RelocateAddr){
   EFI_STATUS Status;
   EFI_PHYSICAL_ADDRESS BufferAddress;
@@ -52,14 +63,14 @@ EFI_STATUS RelocateELF(CHAR16* KernelPath, EFI_PHYSICAL_ADDRESS* RelocateAddr){
   Print(L"Allocate End Address:%x\n",alloc_end_address);
   Print(L"Entry Address:%x\n",Ehdr->e_entry);
   UINTN page_size = ((alloc_end_address - alloc_start_address)/4096)+1;
+  Print(L"AllocatePages=%d\n",page_size);
   Status = gBS->AllocatePages(
     AllocateAddress,
     EfiLoaderData,
     page_size,
     &alloc_start_address);
-  Print(L"AllocatePages=%d\n",Status);
   if (EFI_ERROR(Status)) {
-    Print(L"Could not allocate pages at %08lx \n", &alloc_start_address);
+    Print(L"Could not allocate pages at %08lx, error: %d \n", &alloc_start_address, Status);
     return Status;
   }
   for(i=0; i<Ehdr->e_phnum; i++){

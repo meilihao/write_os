@@ -26,7 +26,8 @@ acpica
 ## 部署
 改动:
 1. 将edk2 @ f6392fd的xv6_bootloader迁入项目
-1. 用`xv6_public/tree/uefi@latest`替代`xv6_public @ 633b564`(`make kernelmemfs`报错)
+1. 修复`xv6_public @ 633b564`和`xv6_public/tree/uefi@latest=57d193e`执行`make kernelmemfs`报错, 见FAQ
+
 
 ```
 # pushd .
@@ -45,3 +46,37 @@ acpica
 ```
 
 实测: 显示logo时花屏并重启
+
+## FAQ
+### `make kernelmemfs`报`ld: vm.o:.../xv6_public-633b564fadae93e054fe038cba5febc77ce160f0/graphic.h:34: multiple definition of `gpu'; console.o:.../xv6_public-633b564fadae93e054fe038cba5febc77ce160f0/graphic.h:34: first defined here`
+ref:
+- [multiple definition of `xxxx`问题解决及其原理](https://blog.csdn.net/mantis_1984/article/details/53571758)
+
+解决方法: 在.c程序中定义全局变量，在.h文件中使用extern 做外部声明，供其他文件调用, 目的其实只有一个，就是使变量在内存中唯一化.
+
+graphic.c
+```c
+#include "defs.h"
+
+struct gpu gpu;
+
+/*
+ * i%4 = 0 : blue
+ * i%4 = 1 : green
+ * i%4 = 2 : red
+ * i%4 = 3 : black
+ */
+void graphic_init(){
+```
+
+graphic.h
+```c
+void graphic_scroll_up(int height);
+
+extern struct gpu gpu;
+
+#endif
+```
+
+
+

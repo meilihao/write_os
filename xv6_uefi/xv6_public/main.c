@@ -5,6 +5,13 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "mp_uefi.h"
+#include "debug.h"
+#include "graphic.h"
+#include "font.h"
+#include "pci.h"
+#include "i8254.h"
+#include "arp.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -17,12 +24,13 @@ extern char end[]; // first address after kernel loaded from ELF file
 int
 main(void)
 {
+  graphic_init();
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
-  mpinit();        // detect other processors
+  mpinit_uefi();
   lapicinit();     // interrupt controller
   seginit();       // segment descriptors
-  picinit();       // disable pic
+  picinit();    // disable pic
   ioapicinit();    // another interrupt controller
   consoleinit();   // console hardware
   uartinit();      // serial port
@@ -33,7 +41,11 @@ main(void)
   ideinit();       // disk 
   startothers();   // start other processors
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
+  pci_init();
+  arp_scan();
+  i8254_recv();
   userinit();      // first user process
+
   mpmain();        // finish this processor's setup
 }
 
@@ -75,9 +87,9 @@ startothers(void)
   memmove(code, _binary_entryother_start, (uint)_binary_entryother_size);
 
   for(c = cpus; c < cpus+ncpu; c++){
-    if(c == mycpu())  // We've started already.
+    if(c == mycpu()){  // We've started already.
       continue;
-
+    }
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.

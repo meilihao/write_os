@@ -14,6 +14,8 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "font.h"
+#include "graphic.h"
 
 static void consputc(int);
 
@@ -64,6 +66,7 @@ cprintf(char *fmt, ...)
 
   if (fmt == 0)
     panic("null fmt");
+
 
   argp = (uint*)(void*)(&fmt + 1);
   for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
@@ -126,7 +129,7 @@ panic(char *s)
 //PAGEBREAK: 50
 #define BACKSPACE 0x100
 #define CRTPORT 0x3d4
-static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
+/*static ushort *crt = (ushort*)P2V(0xb8000);  // CGA memory
 
 static void
 cgaputc(int c)
@@ -160,7 +163,34 @@ cgaputc(int c)
   outb(CRTPORT, 15);
   outb(CRTPORT+1, pos);
   crt[pos] = ' ' | 0x0700;
+}*/
+
+
+#define CONSOLE_HORIZONTAL_MAX 53
+#define CONSOLE_VERTICAL_MAX 20
+int console_pos = CONSOLE_HORIZONTAL_MAX*(CONSOLE_VERTICAL_MAX);
+//int console_pos = 0;
+void graphic_putc(int c){
+  if(c == '\n'){
+    console_pos += CONSOLE_HORIZONTAL_MAX - console_pos%CONSOLE_HORIZONTAL_MAX;
+    if(console_pos >= CONSOLE_VERTICAL_MAX * CONSOLE_HORIZONTAL_MAX){
+      console_pos -= CONSOLE_HORIZONTAL_MAX;
+      graphic_scroll_up(30);
+    }
+  }else if(c == BACKSPACE){
+    if(console_pos>0) --console_pos;
+  }else{
+    if(console_pos >= CONSOLE_VERTICAL_MAX * CONSOLE_HORIZONTAL_MAX){
+      console_pos -= CONSOLE_HORIZONTAL_MAX;
+      graphic_scroll_up(30);
+    }
+    int x = (console_pos%CONSOLE_HORIZONTAL_MAX)*FONT_WIDTH + 2;
+    int y = (console_pos/CONSOLE_HORIZONTAL_MAX)*FONT_HEIGHT;
+    font_render(x,y,c);
+    console_pos++;
+  }
 }
+
 
 void
 consputc(int c)
@@ -173,9 +203,10 @@ consputc(int c)
 
   if(c == BACKSPACE){
     uartputc('\b'); uartputc(' '); uartputc('\b');
-  } else
+  } else {
     uartputc(c);
-  cgaputc(c);
+  }
+  graphic_putc(c);
 }
 
 #define INPUT_BUF 128
@@ -288,10 +319,16 @@ consolewrite(struct inode *ip, char *buf, int n)
 void
 consoleinit(void)
 {
+  panicked = 0;
   initlock(&cons.lock, "console");
 
   devsw[CONSOLE].write = consolewrite;
   devsw[CONSOLE].read = consoleread;
+  
+  char *p;
+  for(p="Starting XV6_UEFI...\n"; *p; p++)
+    graphic_putc(*p);
+  
   cons.locking = 1;
 
   ioapicenable(IRQ_KBD, 0);

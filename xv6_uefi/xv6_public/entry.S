@@ -40,29 +40,58 @@ multiboot_header:
 .globl _start
 _start = V2P_WO(entry)
 
+.globl wait_main
+wait_main:
+  .long 0
 # Entering xv6 on boot processor, with paging off.
 .globl entry
 entry:
+  #Set Data Segment
+  mov $0x10,%ax
+  mov %ax,%ds
+  mov %ax,%es
+  mov %ax,%ss
+  mov $0,%ax
+  mov %ax,%fs
+  mov %ax,%gs
+
+  #Turn off paing
+  movl %cr0,%eax
+  andl $0x7fffffff,%eax
+  movl %eax,%cr0 
+
+  #Set Page Table Base Address
+  movl    $(V2P_WO(entrypgdir)), %eax
+  movl    %eax, %cr3
+  
+  #Disable IA32e mode
+  movl $0x0c0000080,%ecx
+  rdmsr
+  andl $0xFFFFFEFF,%eax
+  wrmsr
+
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax
   orl     $(CR4_PSE), %eax
+  andl    $0xFFFFFFDF, %eax
   movl    %eax, %cr4
-  # Set page directory
-  movl    $(V2P_WO(entrypgdir)), %eax
-  movl    %eax, %cr3
-  # Turn on paging.
+
+  #Turn on Paging
   movl    %cr0, %eax
-  orl     $(CR0_PG|CR0_WP), %eax
+  orl     $0x80010001, %eax
   movl    %eax, %cr0
+
+
+
 
   # Set up the stack pointer.
   movl $(stack + KSTACKSIZE), %esp
-
   # Jump to main(), and switch to executing at
   # high addresses. The indirect call is needed because
   # the assembler produces a PC-relative instruction
   # for a direct jump.
-  mov $main, %eax
-  jmp *%eax
+#  jz .waiting_main
+  movl $main, %edx
+  jmp %edx
 
 .comm stack, KSTACKSIZE

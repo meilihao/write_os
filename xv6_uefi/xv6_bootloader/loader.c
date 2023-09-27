@@ -27,11 +27,15 @@ UefiMain (
   EFI_STATUS Status;
   CHAR16 *KernelPath = L"\\kernel";
   CHAR16 *bmp_file = L"\\logo.bmp";
-  EFI_PHYSICAL_ADDRESS BootParamAddr = 0x50000;
+  EFI_PHYSICAL_ADDRESS BootParamAddr = 0x50000; // 5M
   EFI_PHYSICAL_ADDRESS KernelBaseAddr;
 
   RelocateELF(KernelPath, &KernelBaseAddr);
-  GetMemoryMapFile();
+  Status = GetMemoryMapFile();
+  if(EFI_ERROR(Status)){
+    Print(L"GetMemoryMapFile Failed: %d\n", Status);
+    return Status;
+  }
 
   VOID *vendor_table;
   Status = EfiGetSystemConfigurationTable(&gEfiAcpiTableGuid,&vendor_table);
@@ -126,6 +130,7 @@ UefiMain (
   }
 
 
+  // 从长模式过渡到兼容模式 
   boot_param->kernel_addr = KernelBaseAddr;
   Print(L"KernelAddress : %x\n",boot_param->kernel_addr);
   boot_param->bootstrap_gdt_desc.size = sizeof(struct gdt)*3;
@@ -153,6 +158,7 @@ UefiMain (
   if(EFI_ERROR(Status)){
     Print(L"Failed to draw bitmap file %s\n",bmp_file);
   }
+  gBS->Stall(3000);
   gBS->GetMemoryMap(
             &MemoryMap.MapSize,
             (EFI_MEMORY_DESCRIPTOR*)MemoryMap.Buffer,
@@ -164,10 +170,11 @@ UefiMain (
   if(EFI_ERROR(Status)){
     Print(L"Could not exit boot services : %r",Status);
   }
+  // 加载配置的 GDT 并跳转到扩展内核的入口点
   asm("lgdt %0": : "m"(boot_param->bootstrap_gdt_desc));
   asm("push $0x08");
   asm("push %0": : "m"(boot_param->kernel_addr));
-  asm("lretq");
+  asm("lretq"); // 使用lretq 的 ret技巧启用了 GDT
   while(1);
 }
 

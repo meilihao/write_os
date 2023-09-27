@@ -6,10 +6,12 @@
 #include "mmu.h"
 #include "proc.h"
 #include "elf.h"
+#include "graphic.h"
 
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
+extern struct gpu gpu;
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
 void
@@ -22,6 +24,7 @@ seginit(void)
   // because it would have to have DPL_USR, but the CPU forbids
   // an interrupt from CPL=0 to DPL=3.
   c = &cpus[cpuid()];
+
   c->gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
   c->gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
   c->gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
@@ -111,7 +114,9 @@ static struct kmap {
  { (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space
  { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata
  { (void*)data,     V2P(data),     PHYSTOP,   PTE_W}, // kern data+memory
- { (void*)DEVSPACE, DEVSPACE,      0,         PTE_W}, // more devices
+ { 0,0,0,0},
+ { (void*)(PCI_BAR_BASE + PCI_VP_OFFSET),PCI_BAR_BASE,0x10000000+PCI_BAR_BASE,PTE_W},
+ { (void*)DEVSPACE, DEVSPACE, 0, PTE_W}, // more devices
 };
 
 // Set up kernel part of a page table.
@@ -120,9 +125,12 @@ setupkvm(void)
 {
   pde_t *pgdir;
   struct kmap *k;
-
-  if((pgdir = (pde_t*)kalloc()) == 0)
+  k = kmap;
+  struct kmap vram = { (void*)(DEVSPACE - gpu.vram_size),gpu.pvram_addr,gpu.pvram_addr+gpu.vram_size, PTE_W};
+  k[3] = vram;
+  if((pgdir = (pde_t*)kalloc()) == 0){
     return 0;
+  }
   memset(pgdir, 0, PGSIZE);
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
     panic("PHYSTOP too high");

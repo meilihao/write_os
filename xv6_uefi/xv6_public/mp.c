@@ -34,6 +34,7 @@ mpsearch1(uint a, int len)
 
   addr = P2V(a);
   e = addr+len;
+  while(1){asm("hlt");}
   for(p = addr; p < e; p += sizeof(struct mp))
     if(memcmp(p, "_MP_", 4) == 0 && sum(p, sizeof(struct mp)) == 0)
       return (struct mp*)p;

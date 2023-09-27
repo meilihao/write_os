@@ -9,7 +9,7 @@
 #include "traps.h"
 #include "mmu.h"
 #include "x86.h"
-
+#include "debug.h"
 // Local APIC registers, divided by 4 for use as uint[] indices.
 #define ID      (0x0020/4)   // ID
 #define VER     (0x0030/4)   // Version
@@ -100,8 +100,10 @@ lapicinit(void)
 int
 lapicid(void)
 {
-  if (!lapic)
+
+  if (!lapic){
     return 0;
+  }
   return lapic[ID] >> 24;
 }
 
