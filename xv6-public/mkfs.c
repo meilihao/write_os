@@ -65,6 +65,7 @@ xint(uint x)
   return y;
 }
 
+// [xv6——文件系统：FS的布局和inode的读写操作 ](https://www.cnblogs.com/yinheyi/p/16464407.html)
 // xv6 实现的不是现有的任何一个文件系统, 有人实现了minix v1: [Minix v1 文件系统的实现](https://silverrainz.me/blog/minix-v1-file-system.html)
 int
 main(int argc, char *argv[])
