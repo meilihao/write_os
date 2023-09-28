@@ -73,7 +73,7 @@ endif
 
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
-LD = $(TOOLPREFIX)ld
+LD = $(TOOLPREFIX)ld #-Map kernel.map
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -Wno-array-bounds -Wno-error=infinite-recursion

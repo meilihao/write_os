@@ -98,11 +98,17 @@ startothers(void)
 // Page directories (and page tables) must start on page boundaries,
 // hence the __aligned__ attribute.
 // PTE_PS in a page directory entry enables 4Mbyte pages.
-
+// 临时页表: pde_t [1024]{[0] = (pde_t)131U, [512] = (pde_t)131U}, 当前内核最多只能使用 4MB 的内存
+// |      VA      |     P   |
+// |--------------|---------|
+// |0 ~ 4MB       | 0 ~ 4MB |
+// |2GB ~ 2GB+4MB | 0 ~ 4MB |
+// entrypgdir vaddr=0x80109000(by ld map). 页表对齐: 页表条目的start vaddr需要page size对齐. entrypgdir仅需要4k(by pd size)对齐for ia32
+// 分页硬件运行起来以后，处理器仍然在低地址空间执行指令因为entrypgdir被映射到低地址空间。如果xv6的entrypgdir没有第0项，电脑在运行开启分页硬件的后一条指令时将崩溃
 __attribute__((__aligned__(PGSIZE)))
 pde_t entrypgdir[NPDENTRIES] = {
   // Map VA's [0, 4MB) to PA's [0, 4MB)
-  [0] = (0) | PTE_P | PTE_W | PTE_PS,
+  [0] = (0) | PTE_P | PTE_W | PTE_PS, // 0x083
   // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
   [KERNBASE>>PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
 };

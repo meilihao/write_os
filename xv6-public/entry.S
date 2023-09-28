@@ -24,6 +24,7 @@
 #include "param.h"
 
 # Multiboot header.  Data to direct multiboot loader.
+// 为了方便通过 GNU GRUB 来引导 xv6
 .p2align 2
 .text
 .globl multiboot_header
@@ -38,7 +39,7 @@ multiboot_header:
 # Since we haven't set up virtual memory yet, our entry point is
 # the physical address of 'entry'.
 .globl _start
-_start = V2P_WO(entry)
+_start = V2P_WO(entry) // 还未开启分页, entry是VirtualAddr
 
 # Entering xv6 on boot processor, with paging off.
 .globl entry
@@ -48,11 +49,11 @@ entry:
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Set page directory
-  movl    $(V2P_WO(entrypgdir)), %eax
+  movl    $(V2P_WO(entrypgdir)), %eax # entrypgdir 在 main.c
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax
-  orl     $(CR0_PG|CR0_WP), %eax
+  orl     $(CR0_PG|CR0_WP), %eax // CR0_WP: 禁止supervisor-level procedures写只读页
   movl    %eax, %cr0
 
   # Set up the stack pointer.
@@ -62,7 +63,7 @@ entry:
   # high addresses. The indirect call is needed because
   # the assembler produces a PC-relative instruction
   # for a direct jump.
-  mov $main, %eax
+  mov $main, %eax // main.c
   jmp *%eax
 
-.comm stack, KSTACKSIZE
+.comm stack, KSTACKSIZE // 在内核 bbs 段开辟了一段 KSTACKSIZE = 4096 = 4KB 大小的内核栈并将栈顶设置为这段数据区域的末尾处（栈是自上而下增长）
