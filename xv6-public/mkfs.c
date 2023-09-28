@@ -66,7 +66,7 @@ xint(uint x)
 }
 
 // [xv6——文件系统：FS的布局和inode的读写操作 ](https://www.cnblogs.com/yinheyi/p/16464407.html)
-// xv6 实现的不是现有的任何一个文件系统, 有人实现了minix v1: [Minix v1 文件系统的实现](https://silverrainz.me/blog/minix-v1-file-system.html)
+// TODO: xv6 实现的不是现有的任何一个文件系统, 有人实现了minix v1: [Minix v1 文件系统的实现](https://silverrainz.me/blog/minix-v1-file-system.html)
 int
 main(int argc, char *argv[])
 {
@@ -170,11 +170,13 @@ main(int argc, char *argv[])
     close(fd);
   }
 
-  // fix size of root inode dir???修正理由, 原先可计算目录下文件个数
+  // fix size of root inode dir
+  // 修正理由: [类似linux(by `stat`), dir inode size是block size的整数倍](https://unix.stackexchange.com/questions/356682/how-directory-size-is-calculated).
+  // 推测需要用dirent.inum=0来判断子文件条目结束
   rinode(rootino, &din);
   off = xint(din.size);
   printf("old rootino size: %d\n", off); // 288=de*18 = 16(program) + `.`+`..`
-  off = ((off/BSIZE) + 1) * BSIZE; // 占用块数 * 块数. size刚好等于512时, off就多了, 应是(off+(BSIZE-1))/BSIZE*BSIZE
+  off = ((off/BSIZE) + 1) * BSIZE; //TODO: 占用块数 * 块数. 当size刚好等于512时, off就多了, 应是(off+(BSIZE-1))/BSIZE*BSIZE
   din.size = xint(off);
   printf("new rootino size: %d\n", din.size);
   winode(rootino, &din);
