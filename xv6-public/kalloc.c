@@ -28,11 +28,13 @@ struct {
 // the pages mapped by entrypgdir on free list.
 // 2. main() calls kinit2() with the rest of the physical pages
 // after installing a full page table that maps them on all cores.
+// 将bss(提示: 结合kernel的内存布局 by readelf+kernel.map)~4M的空闲空间纳入虚拟内存页管理, 用来kalloc
 void
 kinit1(void *vstart, void *vend)
 {
+  // 在调用kinit1时并不用锁, 代码只在 Boot Strap Processor (BSP)上执行
   initlock(&kmem.lock, "kmem");
-  kmem.use_lock = 0;
+  kmem.use_lock = 0; // kmem.freelist不用初始化: kmem在bss的0x80111640
   freerange(vstart, vend);
 }
 
@@ -56,6 +58,7 @@ freerange(void *vstart, void *vend)
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
+// 每page的开头是struct run实例的内容. 因此kmem.freelist+每page开头的struct run组成了一个链表
 void
 kfree(char *v)
 {
@@ -65,12 +68,12 @@ kfree(char *v)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
-  memset(v, 1, PGSIZE);
+  memset(v, 1, PGSIZE); //将这个页填充无用信息，全置为1
 
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = (struct run*)v;
-  r->next = kmem.freelist;
+  r->next = kmem.freelist; // 使用头插法将这个页放在链首
   kmem.freelist = r;
   if(kmem.use_lock)
     release(&kmem.lock);

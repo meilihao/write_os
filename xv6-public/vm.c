@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "elf.h"
 
-extern char data[];  // defined by kernel.ld
+extern char data[];  // defined by kernel.ld // data是.data的开始地址
 pde_t *kpgdir;  // for use in scheduler()
 
 // Set up CPU's kernel segment descriptors.
@@ -32,6 +32,7 @@ seginit(void)
 // Return the address of the PTE in page table pgdir
 // that corresponds to virtual address va.  If alloc!=0,
 // create any required page table pages.
+// walkpgdir 给定一个虚拟地址和页表，找到该虚拟地址对应的页表项
 static pte_t *
 walkpgdir(pde_t *pgdir, const void *va, int alloc)
 {
@@ -40,8 +41,8 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 
   pde = &pgdir[PDX(va)];
   if(*pde & PTE_P){
-    pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-  } else {
+    pgtab = (pte_t*)P2V(PTE_ADDR(*pde)); // 取一级页表的物理地址，转化成虚拟地址
+  } else { // 如果对应的 PDE 不存在且 alloc = 1 表示要创建一个 PDE，会申请一个页作为页表，然后在这个页表中找到对应的 PTE
     if(!alloc || (pgtab = (pte_t*)kalloc()) == 0)
       return 0;
     // Make sure all those PTE_P bits are zero.
@@ -57,6 +58,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.
+// 映射虚拟地址段
 static int
 mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 {
@@ -115,6 +117,10 @@ static struct kmap {
 };
 
 // Set up kernel part of a page table.
+// 通过 kamp 数组，将物理内存分为四个部分映射到虚拟内存中，这四个部分在物理地址是不一定连续的，在虚拟地址是连续的
+// kmap 就是这四个段：0~1MB，1MB~data，data~PHYSTOP，DEVSPACE~4G.
+// 除了第二段是内核程序只能读不能写之外，其他都是可以读写的
+// DEVSPACE 该段有一个 0，表示对 2^32 取整后的 4G，进入程序模拟一下发现并不会出错（在 mappages 中，3G... + PGSIZE = 4G % 4G = 0，由于 a = 0，last = 0，退出)
 pde_t*
 setupkvm(void)
 {
@@ -127,9 +133,9 @@ setupkvm(void)
   if (P2V(PHYSTOP) > (void*)DEVSPACE)
     panic("PHYSTOP too high");
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
-    if(mappages(pgdir, k->virt, k->phys_end - k->phys_start,
+    if(mappages(pgdir, k->virt, k->phys_end - k->phys_start, // 推测0-DEVSPACE空间=DEVSPACE~4G
                 (uint)k->phys_start, k->perm) < 0) {
-      freevm(pgdir);
+      freevm(pgdir); // 写入失败时释放当前在写的这个页目录表并跳出
       return 0;
     }
   return pgdir;
@@ -137,6 +143,7 @@ setupkvm(void)
 
 // Allocate one page table for the machine for the kernel address
 // space for scheduler processes.
+// end到4MB的空间足以分配一个真正的内存页表
 void
 kvmalloc(void)
 {
@@ -253,6 +260,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 // need to be less than oldsz.  oldsz can be larger than the actual
 // process size.  Returns the new process size.
 int
+// 将newsz到oldsz对应的虚拟地址空间内存置为空闲
 deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
   pte_t *pte;
@@ -265,7 +273,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   for(; a  < oldsz; a += PGSIZE){
     pte = walkpgdir(pgdir, (char*)a, 0);
     if(!pte)
-      a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;
+      a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE; // `- PGSIZE`是因为循环条件是`a += PGSIZE`, 需抵消 ??? 为什么不是continue, 是因为虚拟地址是连续的原因吗?
     else if((*pte & PTE_P) != 0){
       pa = PTE_ADDR(*pte);
       if(pa == 0)
@@ -287,14 +295,14 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, KERNBASE, 0);
-  for(i = 0; i < NPDENTRIES; i++){
+  deallocuvm(pgdir, KERNBASE, 0); // 释放所有分配的页
+  for(i = 0; i < NPDENTRIES; i++){ // 释放所有分配的页表页
     if(pgdir[i] & PTE_P){
       char * v = P2V(PTE_ADDR(pgdir[i]));
-      kfree(v);
+      kfree(v); // 释放PT页
     }
   }
-  kfree((char*)pgdir);
+  kfree((char*)pgdir); // 释放PDT页
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible

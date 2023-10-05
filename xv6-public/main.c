@@ -9,7 +9,7 @@
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t *kpgdir;
-extern char end[]; // first address after kernel loaded from ELF file
+extern char end[]; // first address after kernel loaded from ELF file. end是变量地址0x801154d0, end在bss末尾(by kernel.ld), 见kernel.map
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
@@ -17,7 +17,7 @@ extern char end[]; // first address after kernel loaded from ELF file
 int
 main(void)
 {
-  kinit1(end, P2V(4*1024*1024)); // phys page allocator
+  kinit1(end, P2V(4*1024*1024)); // phys page allocator [xv6 的内存管理](https://juejin.cn/post/6996936887562666015)
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
   lapicinit();     // interrupt controller
@@ -98,13 +98,22 @@ startothers(void)
 // Page directories (and page tables) must start on page boundaries,
 // hence the __aligned__ attribute.
 // PTE_PS in a page directory entry enables 4Mbyte pages.
+// 页目录表项的PS位置为1, 且cr4寄存器的PSE位置为1，那么CPU自动使用4M大小的内存页
 // 临时页表: pde_t [1024]{[0] = (pde_t)131U, [512] = (pde_t)131U}, 当前内核最多只能使用 4MB 的内存
 // |      VA      |     P   |
 // |--------------|---------|
 // |0 ~ 4MB       | 0 ~ 4MB |
 // |2GB ~ 2GB+4MB | 0 ~ 4MB |
 // entrypgdir vaddr=0x80109000(by ld map). 页表对齐: 页表条目的start vaddr需要page size对齐. entrypgdir仅需要4k(by pd size)对齐for ia32
-// 分页硬件运行起来以后，处理器仍然在低地址空间执行指令因为entrypgdir被映射到低地址空间。如果xv6的entrypgdir没有第0项，电脑在运行开启分页硬件的后一条指令时将崩溃
+// 分页硬件运行起来以后，处理器仍然在低地址空间执行指令因为entrypgdir被映射到低地址空间。如果xv6的entrypgdir没有第0项，电脑在运行开启分页硬件的后一条指令时将崩溃.
+// 同时在启动多处理器的时候，还需要从低地址启动，因为这些CPU（non-boot CPU，也叫做AP）要需要从real mode启动，见entryOther.S
+//
+// 注意x86运行两种分页同时存在，比如cr4的PSE位设为1，而有些page dir表项设置PS位而有些
+// 则不设置，这样就同时存在两种分页机制。为何要使用4MB页呢，考虑这种场景：kernel img
+// 大小大约为1M，如果使用4M页映射kernel img，则TLB只需缓存一个页目录项即可，而如果是
+// 4K页则需要256个页目录项，这么多的表项是无法都缓存到TLB中的，这会使得地址翻译变慢很多。
+// 所以kernel img部分一般用一个4M页进行映射，而其他则使用4K页。
+// 对于xv6来说，使用4M页只是临时，不用创建复杂的页表，内核启动之后很快就会重新创建4k页表
 __attribute__((__aligned__(PGSIZE)))
 pde_t entrypgdir[NPDENTRIES] = {
   // Map VA's [0, 4MB) to PA's [0, 4MB)

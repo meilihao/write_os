@@ -1,0 +1,1219 @@
+
+分配公共符号
+公共符号            大小              文件
+
+stack               0x1000            entry.o
+
+舍弃的输入节
+
+ .note.GNU-stack
+                0x0000000000000000        0x0 bio.o
+ .eh_frame      0x0000000000000000       0xd0 bio.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 console.o
+ .eh_frame      0x0000000000000000      0x194 console.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 exec.o
+ .eh_frame      0x0000000000000000       0x48 exec.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 file.o
+ .eh_frame      0x0000000000000000      0x194 file.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 fs.o
+ .eh_frame      0x0000000000000000      0x42c fs.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 ide.o
+ .eh_frame      0x0000000000000000       0xcc ide.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 ioapic.o
+ .eh_frame      0x0000000000000000       0x60 ioapic.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 kalloc.o
+ .eh_frame      0x0000000000000000       0xec kalloc.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 kbd.o
+ .eh_frame      0x0000000000000000       0x70 kbd.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 lapic.o
+ .eh_frame      0x0000000000000000       0xbc lapic.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 log.o
+ .eh_frame      0x0000000000000000      0x118 log.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 main.o
+ .eh_frame      0x0000000000000000       0x78 main.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 mp.o
+ .eh_frame      0x0000000000000000       0x84 mp.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 picirq.o
+ .eh_frame      0x0000000000000000       0x2c picirq.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 pipe.o
+ .eh_frame      0x0000000000000000       0xec pipe.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 proc.o
+ .eh_frame      0x0000000000000000      0x300 proc.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 sleeplock.o
+ .eh_frame      0x0000000000000000       0xbc sleeplock.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 spinlock.o
+ .eh_frame      0x0000000000000000      0x144 spinlock.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 string.o
+ .eh_frame      0x0000000000000000      0x170 string.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 syscall.o
+ .eh_frame      0x0000000000000000      0x128 syscall.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 sysfile.o
+ .eh_frame      0x0000000000000000      0x2c0 sysfile.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 sysproc.o
+ .eh_frame      0x0000000000000000      0x120 sysproc.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 trap.o
+ .eh_frame      0x0000000000000000       0x98 trap.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 uart.o
+ .eh_frame      0x0000000000000000       0xa4 uart.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 vm.o
+ .eh_frame      0x0000000000000000      0x340 vm.o
+
+内存配置
+
+名称           来源             长度             属性
+*default*        0x0000000000000000 0xffffffffffffffff
+
+链结器命令稿和内存映射
+
+                0x0000000080100000                . = 0x80100000
+
+.text           0x0000000080100000     0x71d8 加载地址 0x0000000000100000
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x0000000080100000       0x34 entry.o
+                0x0000000080100000                multiboot_header
+                0x000000008010000c                entry
+                0x000000010010000c                _start
+ *fill*         0x0000000080100034        0xc 
+ .text          0x0000000080100040      0x23b bio.o
+                0x0000000080100040                binit
+                0x00000000801000d0                bread
+                0x00000000801001b0                bwrite
+                0x00000000801001f0                brelse
+ *fill*         0x000000008010027b        0x5 
+ .text          0x0000000080100280      0x853 console.o
+                0x0000000080100280                consoleread
+                0x0000000080100380                panic
+                0x00000000801005b0                consolewrite
+                0x00000000801006b0                cprintf
+                0x00000000801008c0                consoleintr
+                0x0000000080100a90                consoleinit
+ *fill*         0x0000000080100ad3        0xd 
+ .text          0x0000000080100ae0      0x37c exec.o
+                0x0000000080100ae0                exec
+ *fill*         0x0000000080100e5c        0x4 
+ .text          0x0000000080100e60      0x3ab file.o
+                0x0000000080100e60                fileinit
+                0x0000000080100e80                filealloc
+                0x0000000080100ef0                filedup
+                0x0000000080100f40                fileclose
+                0x0000000080101020                filestat
+                0x0000000080101070                fileread
+                0x0000000080101100                filewrite
+ *fill*         0x000000008010120b        0x5 
+ .text          0x0000000080101210      0xf24 fs.o
+                0x0000000080101570                readsb
+                0x00000000801015b0                iinit
+                0x0000000080101660                ialloc
+                0x0000000080101720                iupdate
+                0x00000000801017a0                idup
+                0x00000000801017d0                ilock
+                0x00000000801018b0                iunlock
+                0x0000000080101900                iput
+                0x0000000080101a60                iunlockput
+                0x0000000080101ab0                stati
+                0x0000000080101ae0                readi
+                0x0000000080101be0                writei
+                0x0000000080101d10                namecmp
+                0x0000000080101d30                dirlookup
+                0x0000000080102040                dirlink
+                0x0000000080102100                namei
+                0x0000000080102120                nameiparent
+ *fill*         0x0000000080102134        0xc 
+ .text          0x0000000080102140      0x2fe ide.o
+                0x0000000080102220                ideinit
+                0x00000000801022b0                ideintr
+                0x0000000080102350                iderw
+ *fill*         0x000000008010243e        0x2 
+ .text          0x0000000080102440       0xd3 ioapic.o
+                0x0000000080102440                ioapicinit
+                0x00000000801024e0                ioapicenable
+ *fill*         0x0000000080102513        0xd 
+ .text          0x0000000080102520      0x232 kalloc.o
+                0x0000000080102520                kfree
+                0x00000000801025c0                freerange
+                0x0000000080102610                kinit2
+                0x0000000080102670                kinit1
+                0x00000000801026e0                kalloc
+ *fill*         0x0000000080102752        0xe 
+ .text          0x0000000080102760       0xf5 kbd.o
+                0x0000000080102760                kbdgetc
+                0x0000000080102840                kbdintr
+ *fill*         0x0000000080102855        0xb 
+ .text          0x0000000080102860      0x3ca lapic.o
+                0x0000000080102860                lapicinit
+                0x0000000080102960                lapicid
+                0x0000000080102980                lapiceoi
+                0x00000000801029a0                microdelay
+                0x00000000801029b0                lapicstartap
+                0x0000000080102a40                cmostime
+ *fill*         0x0000000080102c2a        0x6 
+ .text          0x0000000080102c30      0x42c log.o
+                0x0000000080102d30                initlog
+                0x0000000080102dd0                begin_op
+                0x0000000080102e40                end_op
+                0x0000000080102fb0                log_write
+ *fill*         0x000000008010305c        0x4 
+ .text          0x0000000080103060       0x5a main.o
+ *fill*         0x00000000801030ba        0x6 
+ .text.startup  0x00000000801030c0      0x12c main.o
+                0x00000000801030c0                main
+ *fill*         0x00000000801031ec        0x4 
+ .text          0x00000000801031f0      0x282 mp.o
+                0x0000000080103270                mpinit
+ *fill*         0x0000000080103472        0xe 
+ .text          0x0000000080103480       0x12 picirq.o
+                0x0000000080103480                picinit
+ *fill*         0x0000000080103492        0xe 
+ .text          0x00000000801034a0      0x38b pipe.o
+                0x00000000801034a0                pipealloc
+                0x0000000080103590                pipeclose
+                0x0000000080103630                pipewrite
+                0x0000000080103750                piperead
+ *fill*         0x000000008010382b        0x5 
+ .text          0x0000000080103830      0xae0 proc.o
+                0x0000000080103900                forkret
+                0x0000000080103950                pinit
+                0x0000000080103970                mycpu
+                0x00000000801039d0                cpuid
+                0x00000000801039f0                myproc
+                0x0000000080103a20                userinit
+                0x0000000080103b10                growproc
+                0x0000000080103b90                fork
+                0x0000000080103ca0                scheduler
+                0x0000000080103d40                sched
+                0x0000000080103e00                exit
+                0x0000000080103f30                wait
+                0x0000000080104060                yield
+                0x00000000801040b0                sleep
+                0x0000000080104170                wakeup
+                0x00000000801041d0                kill
+                0x0000000080104250                procdump
+ .text          0x0000000080104310      0x12d sleeplock.o
+                0x0000000080104310                initsleeplock
+                0x0000000080104350                acquiresleep
+                0x00000000801043b0                releasesleep
+                0x00000000801043f0                holdingsleep
+ *fill*         0x000000008010443d        0x3 
+ .text          0x0000000080104440      0x2ba spinlock.o
+                0x0000000080104440                initlock
+                0x0000000080104460                getcallerpcs
+                0x00000000801044d0                pushcli
+                0x0000000080104520                popcli
+                0x0000000080104580                holding
+                0x00000000801045c0                release
+                0x0000000080104620                acquire
+ *fill*         0x00000000801046fa        0x6 
+ .text          0x0000000080104700      0x20b string.o
+                0x0000000080104700                memset
+                0x0000000080104740                memcmp
+                0x0000000080104790                memmove
+                0x00000000801047f0                memcpy
+                0x0000000080104800                strncmp
+                0x0000000080104850                strncpy
+                0x00000000801048b0                safestrcpy
+                0x00000000801048f0                strlen
+ .text          0x000000008010490b       0x15 swtch.o
+                0x000000008010490b                swtch
+ .text          0x0000000080104920      0x234 syscall.o
+                0x0000000080104920                fetchint
+                0x0000000080104960                fetchstr
+                0x00000000801049b0                argint
+                0x0000000080104a00                argptr
+                0x0000000080104a70                argstr
+                0x0000000080104af0                syscall
+ *fill*         0x0000000080104b54        0xc 
+ .text          0x0000000080104b60      0xb81 sysfile.o
+                0x0000000080104ce0                sys_dup
+                0x0000000080104d60                sys_read
+                0x0000000080104de0                sys_write
+                0x0000000080104e60                sys_close
+                0x0000000080104ec0                sys_fstat
+                0x0000000080104f30                sys_link
+                0x0000000080105070                sys_unlink
+                0x0000000080105240                sys_open
+                0x0000000080105380                sys_mkdir
+                0x00000000801053e0                sys_mknod
+                0x0000000080105470                sys_chdir
+                0x0000000080105520                sys_exec
+                0x0000000080105610                sys_pipe
+ *fill*         0x00000000801056e1        0xf 
+ .text          0x00000000801056f0      0x1aa sysproc.o
+                0x00000000801056f0                sys_fork
+                0x0000000080105700                sys_exit
+                0x0000000080105710                sys_wait
+                0x0000000080105720                sys_kill
+                0x0000000080105760                sys_getpid
+                0x0000000080105770                sys_sbrk
+                0x00000000801057c0                sys_sleep
+                0x0000000080105870                sys_uptime
+ .text          0x000000008010589a       0x23 trapasm.o
+                0x000000008010589a                alltraps
+                0x00000000801058b2                trapret
+ *fill*         0x00000000801058bd        0x3 
+ .text          0x00000000801058c0      0x33a trap.o
+                0x00000000801058c0                tvinit
+                0x0000000080105940                idtinit
+                0x0000000080105970                trap
+ *fill*         0x0000000080105bfa        0x6 
+ .text          0x0000000080105c00      0x195 uart.o
+                0x0000000080105c30                uartinit
+                0x0000000080105d20                uartputc
+                0x0000000080105d80                uartintr
+ .text          0x0000000080105d95      0xa72 vectors.o
+                0x0000000080105d95                vector0
+                0x0000000080105d9e                vector1
+                0x0000000080105da7                vector2
+                0x0000000080105db0                vector3
+                0x0000000080105db9                vector4
+                0x0000000080105dc2                vector5
+                0x0000000080105dcb                vector6
+                0x0000000080105dd4                vector7
+                0x0000000080105ddd                vector8
+                0x0000000080105de4                vector9
+                0x0000000080105ded                vector10
+                0x0000000080105df4                vector11
+                0x0000000080105dfb                vector12
+                0x0000000080105e02                vector13
+                0x0000000080105e09                vector14
+                0x0000000080105e10                vector15
+                0x0000000080105e19                vector16
+                0x0000000080105e22                vector17
+                0x0000000080105e29                vector18
+                0x0000000080105e32                vector19
+                0x0000000080105e3b                vector20
+                0x0000000080105e44                vector21
+                0x0000000080105e4d                vector22
+                0x0000000080105e56                vector23
+                0x0000000080105e5f                vector24
+                0x0000000080105e68                vector25
+                0x0000000080105e71                vector26
+                0x0000000080105e7a                vector27
+                0x0000000080105e83                vector28
+                0x0000000080105e8c                vector29
+                0x0000000080105e95                vector30
+                0x0000000080105e9e                vector31
+                0x0000000080105ea7                vector32
+                0x0000000080105eb0                vector33
+                0x0000000080105eb9                vector34
+                0x0000000080105ec2                vector35
+                0x0000000080105ecb                vector36
+                0x0000000080105ed4                vector37
+                0x0000000080105edd                vector38
+                0x0000000080105ee6                vector39
+                0x0000000080105eef                vector40
+                0x0000000080105ef8                vector41
+                0x0000000080105f01                vector42
+                0x0000000080105f0a                vector43
+                0x0000000080105f13                vector44
+                0x0000000080105f1c                vector45
+                0x0000000080105f25                vector46
+                0x0000000080105f2e                vector47
+                0x0000000080105f37                vector48
+                0x0000000080105f40                vector49
+                0x0000000080105f49                vector50
+                0x0000000080105f52                vector51
+                0x0000000080105f5b                vector52
+                0x0000000080105f64                vector53
+                0x0000000080105f6d                vector54
+                0x0000000080105f76                vector55
+                0x0000000080105f7f                vector56
+                0x0000000080105f88                vector57
+                0x0000000080105f91                vector58
+                0x0000000080105f9a                vector59
+                0x0000000080105fa3                vector60
+                0x0000000080105fac                vector61
+                0x0000000080105fb5                vector62
+                0x0000000080105fbe                vector63
+                0x0000000080105fc7                vector64
+                0x0000000080105fd0                vector65
+                0x0000000080105fd9                vector66
+                0x0000000080105fe2                vector67
+                0x0000000080105feb                vector68
+                0x0000000080105ff4                vector69
+                0x0000000080105ffd                vector70
+                0x0000000080106006                vector71
+                0x000000008010600f                vector72
+                0x0000000080106018                vector73
+                0x0000000080106021                vector74
+                0x000000008010602a                vector75
+                0x0000000080106033                vector76
+                0x000000008010603c                vector77
+                0x0000000080106045                vector78
+                0x000000008010604e                vector79
+                0x0000000080106057                vector80
+                0x0000000080106060                vector81
+                0x0000000080106069                vector82
+                0x0000000080106072                vector83
+                0x000000008010607b                vector84
+                0x0000000080106084                vector85
+                0x000000008010608d                vector86
+                0x0000000080106096                vector87
+                0x000000008010609f                vector88
+                0x00000000801060a8                vector89
+                0x00000000801060b1                vector90
+                0x00000000801060ba                vector91
+                0x00000000801060c3                vector92
+                0x00000000801060cc                vector93
+                0x00000000801060d5                vector94
+                0x00000000801060de                vector95
+                0x00000000801060e7                vector96
+                0x00000000801060f0                vector97
+                0x00000000801060f9                vector98
+                0x0000000080106102                vector99
+                0x000000008010610b                vector100
+                0x0000000080106114                vector101
+                0x000000008010611d                vector102
+                0x0000000080106126                vector103
+                0x000000008010612f                vector104
+                0x0000000080106138                vector105
+                0x0000000080106141                vector106
+                0x000000008010614a                vector107
+                0x0000000080106153                vector108
+                0x000000008010615c                vector109
+                0x0000000080106165                vector110
+                0x000000008010616e                vector111
+                0x0000000080106177                vector112
+                0x0000000080106180                vector113
+                0x0000000080106189                vector114
+                0x0000000080106192                vector115
+                0x000000008010619b                vector116
+                0x00000000801061a4                vector117
+                0x00000000801061ad                vector118
+                0x00000000801061b6                vector119
+                0x00000000801061bf                vector120
+                0x00000000801061c8                vector121
+                0x00000000801061d1                vector122
+                0x00000000801061da                vector123
+                0x00000000801061e3                vector124
+                0x00000000801061ec                vector125
+                0x00000000801061f5                vector126
+                0x00000000801061fe                vector127
+                0x0000000080106207                vector128
+                0x0000000080106213                vector129
+                0x000000008010621f                vector130
+                0x000000008010622b                vector131
+                0x0000000080106237                vector132
+                0x0000000080106243                vector133
+                0x000000008010624f                vector134
+                0x000000008010625b                vector135
+                0x0000000080106267                vector136
+                0x0000000080106273                vector137
+                0x000000008010627f                vector138
+                0x000000008010628b                vector139
+                0x0000000080106297                vector140
+                0x00000000801062a3                vector141
+                0x00000000801062af                vector142
+                0x00000000801062bb                vector143
+                0x00000000801062c7                vector144
+                0x00000000801062d3                vector145
+                0x00000000801062df                vector146
+                0x00000000801062eb                vector147
+                0x00000000801062f7                vector148
+                0x0000000080106303                vector149
+                0x000000008010630f                vector150
+                0x000000008010631b                vector151
+                0x0000000080106327                vector152
+                0x0000000080106333                vector153
+                0x000000008010633f                vector154
+                0x000000008010634b                vector155
+                0x0000000080106357                vector156
+                0x0000000080106363                vector157
+                0x000000008010636f                vector158
+                0x000000008010637b                vector159
+                0x0000000080106387                vector160
+                0x0000000080106393                vector161
+                0x000000008010639f                vector162
+                0x00000000801063ab                vector163
+                0x00000000801063b7                vector164
+                0x00000000801063c3                vector165
+                0x00000000801063cf                vector166
+                0x00000000801063db                vector167
+                0x00000000801063e7                vector168
+                0x00000000801063f3                vector169
+                0x00000000801063ff                vector170
+                0x000000008010640b                vector171
+                0x0000000080106417                vector172
+                0x0000000080106423                vector173
+                0x000000008010642f                vector174
+                0x000000008010643b                vector175
+                0x0000000080106447                vector176
+                0x0000000080106453                vector177
+                0x000000008010645f                vector178
+                0x000000008010646b                vector179
+                0x0000000080106477                vector180
+                0x0000000080106483                vector181
+                0x000000008010648f                vector182
+                0x000000008010649b                vector183
+                0x00000000801064a7                vector184
+                0x00000000801064b3                vector185
+                0x00000000801064bf                vector186
+                0x00000000801064cb                vector187
+                0x00000000801064d7                vector188
+                0x00000000801064e3                vector189
+                0x00000000801064ef                vector190
+                0x00000000801064fb                vector191
+                0x0000000080106507                vector192
+                0x0000000080106513                vector193
+                0x000000008010651f                vector194
+                0x000000008010652b                vector195
+                0x0000000080106537                vector196
+                0x0000000080106543                vector197
+                0x000000008010654f                vector198
+                0x000000008010655b                vector199
+                0x0000000080106567                vector200
+                0x0000000080106573                vector201
+                0x000000008010657f                vector202
+                0x000000008010658b                vector203
+                0x0000000080106597                vector204
+                0x00000000801065a3                vector205
+                0x00000000801065af                vector206
+                0x00000000801065bb                vector207
+                0x00000000801065c7                vector208
+                0x00000000801065d3                vector209
+                0x00000000801065df                vector210
+                0x00000000801065eb                vector211
+                0x00000000801065f7                vector212
+                0x0000000080106603                vector213
+                0x000000008010660f                vector214
+                0x000000008010661b                vector215
+                0x0000000080106627                vector216
+                0x0000000080106633                vector217
+                0x000000008010663f                vector218
+                0x000000008010664b                vector219
+                0x0000000080106657                vector220
+                0x0000000080106663                vector221
+                0x000000008010666f                vector222
+                0x000000008010667b                vector223
+                0x0000000080106687                vector224
+                0x0000000080106693                vector225
+                0x000000008010669f                vector226
+                0x00000000801066ab                vector227
+                0x00000000801066b7                vector228
+                0x00000000801066c3                vector229
+                0x00000000801066cf                vector230
+                0x00000000801066db                vector231
+                0x00000000801066e7                vector232
+                0x00000000801066f3                vector233
+                0x00000000801066ff                vector234
+                0x000000008010670b                vector235
+                0x0000000080106717                vector236
+                0x0000000080106723                vector237
+                0x000000008010672f                vector238
+                0x000000008010673b                vector239
+                0x0000000080106747                vector240
+                0x0000000080106753                vector241
+                0x000000008010675f                vector242
+                0x000000008010676b                vector243
+                0x0000000080106777                vector244
+                0x0000000080106783                vector245
+                0x000000008010678f                vector246
+                0x000000008010679b                vector247
+                0x00000000801067a7                vector248
+                0x00000000801067b3                vector249
+                0x00000000801067bf                vector250
+                0x00000000801067cb                vector251
+                0x00000000801067d7                vector252
+                0x00000000801067e3                vector253
+                0x00000000801067ef                vector254
+                0x00000000801067fb                vector255
+ *fill*         0x0000000080106807        0x9 
+ .text          0x0000000080106810      0x9ba vm.o
+                0x00000000801069c0                seginit
+                0x0000000080106a50                switchkvm
+                0x0000000080106a60                switchuvm
+                0x0000000080106b70                inituvm
+                0x0000000080106bf0                loaduvm
+                0x0000000080106cc0                allocuvm
+                0x0000000080106de0                deallocuvm
+                0x0000000080106e10                freevm
+                0x0000000080106e90                setupkvm
+                0x0000000080106f10                kvmalloc
+                0x0000000080106f30                clearpteu
+                0x0000000080106f80                copyuvm
+                0x00000000801070b0                uva2ka
+                0x0000000080107100                copyout
+ .text.unlikely
+                0x00000000801071ca        0xe vm.o
+                [!provide]                        PROVIDE (etext = .)
+
+.iplt           0x00000000801071d8        0x0 加载地址 0x00000000001071d8
+ .iplt          0x00000000801071d8        0x0 entry.o
+
+.rodata         0x00000000801071e0      0x9cb 加载地址 0x00000000001071e0
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata.str1.1
+                0x00000000801071e0       0x2d bio.o
+ .rodata.str1.1
+                0x000000008010720d       0x43 console.o
+                                         0x45 (松开之前的大小)
+ .rodata        0x0000000080107250       0x11 console.o
+ .rodata.str1.1
+                0x0000000080107261        0xc exec.o
+ .rodata.str1.1
+                0x000000008010726d       0x32 file.o
+                                         0x3c (松开之前的大小)
+ .rodata.str1.1
+                0x000000008010729f       0xb6 fs.o
+                                         0xbe (松开之前的大小)
+ *fill*         0x0000000080107355        0x3 
+ .rodata.str1.4
+                0x0000000080107358       0x53 fs.o
+ .rodata.str1.1
+                0x00000000801073ab       0x68 ide.o
+ *fill*         0x0000000080107413        0x1 
+ .rodata.str1.4
+                0x0000000080107414       0x32 ioapic.o
+ .rodata.str1.1
+                0x0000000080107446        0xb kalloc.o
+ *fill*         0x0000000080107451        0xf 
+ .rodata        0x0000000080107460      0x220 kbd.o
+ .rodata.str1.1
+                0x0000000080107680       0x44 log.o
+ .rodata.str1.1
+                0x00000000801076c4       0x14 main.o
+ .rodata.str1.1
+                0x00000000801076d8       0x22 mp.o
+ *fill*         0x00000000801076fa        0x2 
+ .rodata.str1.4
+                0x00000000801076fc       0x1f mp.o
+ .rodata.str1.1
+                0x000000008010771b        0x5 pipe.o
+ .rodata.str1.1
+                0x0000000080107720       0xe2 proc.o
+                                         0xe8 (松开之前的大小)
+ *fill*         0x0000000080107802        0x2 
+ .rodata.str1.4
+                0x0000000080107804       0x26 proc.o
+ *fill*         0x000000008010782a        0x2 
+ .rodata        0x000000008010782c       0x18 proc.o
+ .rodata.str1.1
+                0x0000000080107844        0xb sleeplock.o
+ .rodata.str1.1
+                0x000000008010784f       0x2e spinlock.o
+ .rodata.str1.1
+                0x000000008010787d       0x1c syscall.o
+ *fill*         0x0000000080107899        0x7 
+ .rodata        0x00000000801078a0       0x58 syscall.o
+ .rodata.str1.1
+                0x00000000801078f8       0x61 sysfile.o
+                                         0x63 (松开之前的大小)
+ .rodata.str1.1
+                0x0000000080107959        0xa trap.o
+ *fill*         0x0000000080107963        0x1 
+ .rodata.str1.4
+                0x0000000080107964       0x9b trap.o
+ *fill*         0x00000000801079ff        0x1 
+ .rodata        0x0000000080107a00       0x80 trap.o
+ .rodata.str1.1
+                0x0000000080107a80        0x8 uart.o
+ .rodata.str1.1
+                0x0000000080107a88      0x100 vm.o
+                                        0x106 (松开之前的大小)
+ .rodata.str1.4
+                0x0000000080107b88       0x23 vm.o
+
+.rel.dyn        0x0000000080107bac        0x0 加载地址 0x0000000000107bac
+ .rel.got       0x0000000080107bac        0x0 entry.o
+ .rel.iplt      0x0000000080107bac        0x0 entry.o
+ .rel.text      0x0000000080107bac        0x0 entry.o
+ .rel.text.startup
+                0x0000000080107bac        0x0 entry.o
+ .rel.data      0x0000000080107bac        0x0 entry.o
+
+.stab           0x0000000080107bab        0x0
+                [!provide]                        PROVIDE (__STAB_BEGIN__ = .)
+ *(.stab)
+                [!provide]                        PROVIDE (__STAB_END__ = .)
+
+.stabstr        0x0000000080107bab        0x0
+                [!provide]                        PROVIDE (__STABSTR_BEGIN__ = .)
+ *(.stabstr)
+                [!provide]                        PROVIDE (__STABSTR_END__ = .)
+                0x0000000080108000                . = ALIGN (0x1000)
+                0x0000000080108000                PROVIDE (data = .)
+
+.data           0x0000000080108000     0x2516 加载地址 0x0000000000108000
+ *(.data)
+ .data          0x0000000080108000        0x0 entry.o
+ .data          0x0000000080108000        0x0 bio.o
+ .data          0x0000000080108000        0x0 console.o
+ .data          0x0000000080108000        0x0 exec.o
+ .data          0x0000000080108000        0x0 file.o
+ .data          0x0000000080108000        0x0 fs.o
+ .data          0x0000000080108000        0x0 ide.o
+ .data          0x0000000080108000        0x0 ioapic.o
+ .data          0x0000000080108000        0x0 kalloc.o
+ .data          0x0000000080108000      0x300 kbd.o
+ .data          0x0000000080108300        0x0 lapic.o
+ .data          0x0000000080108300        0x0 log.o
+ *fill*         0x0000000080108300      0xd00 
+ .data          0x0000000080109000     0x1000 main.o
+                0x0000000080109000                entrypgdir
+ .data          0x000000008010a000        0x0 mp.o
+ .data          0x000000008010a000        0x0 picirq.o
+ .data          0x000000008010a000        0x0 pipe.o
+ .data          0x000000008010a000        0x8 proc.o
+                0x000000008010a004                nextpid
+ .data          0x000000008010a008        0x0 sleeplock.o
+ .data          0x000000008010a008        0x0 spinlock.o
+ .data          0x000000008010a008        0x0 string.o
+ .data          0x000000008010a008        0x0 swtch.o
+ .data          0x000000008010a008        0x0 syscall.o
+ .data          0x000000008010a008        0x0 sysfile.o
+ .data          0x000000008010a008        0x0 sysproc.o
+ .data          0x000000008010a008        0x0 trapasm.o
+ .data          0x000000008010a008        0x0 trap.o
+ .data          0x000000008010a008        0x0 uart.o
+ .data          0x000000008010a008      0x400 vectors.o
+                0x000000008010a008                vectors
+ *fill*         0x000000008010a408       0x18 
+ .data          0x000000008010a420       0x40 vm.o
+ .data          0x000000008010a460       0x2c initcode
+                0x000000008010a460                _binary_initcode_start
+                0x000000008010a48c                _binary_initcode_end
+ .data          0x000000008010a48c       0x8a entryother
+                0x000000008010a48c                _binary_entryother_start
+                0x000000008010a516                _binary_entryother_end
+                [!provide]                        PROVIDE (edata = .)
+
+.got            0x000000008010a518        0x0 加载地址 0x000000000010a518
+ .got           0x000000008010a518        0x0 entry.o
+
+.got.plt        0x000000008010a518        0x0 加载地址 0x000000000010a518
+ .got.plt       0x000000008010a518        0x0 entry.o
+
+.igot.plt       0x000000008010a518        0x0 加载地址 0x000000000010a518
+ .igot.plt      0x000000008010a518        0x0 entry.o
+
+.bss            0x000000008010a520     0xafb0 加载地址 0x000000000010a520
+ *(.bss)
+ .bss           0x000000008010a520        0x0 entry.o
+ .bss           0x000000008010a520     0x4958 bio.o
+                0x000000008010a520                bcache
+ *fill*         0x000000008010ee78        0x8 
+ .bss           0x000000008010ee80       0xdc console.o
+                0x000000008010ee80                input
+ .bss           0x000000008010ef5c        0x0 exec.o
+ *fill*         0x000000008010ef5c        0x4 
+ .bss           0x000000008010ef60      0x9f0 file.o
+                0x000000008010ef60                ftable
+                0x000000008010f900                devsw
+ *fill*         0x000000008010f950       0x10 
+ .bss           0x000000008010f960     0x1c70 fs.o
+                0x000000008010f960                icache
+                0x00000000801115b4                sb
+ *fill*         0x00000000801115d0       0x10 
+ .bss           0x00000000801115e0       0x54 ide.o
+ .bss           0x0000000080111634        0x4 ioapic.o
+                0x0000000080111634                ioapic
+ *fill*         0x0000000080111638        0x8 
+ .bss           0x0000000080111640       0x3c kalloc.o
+                0x0000000080111640                kmem
+ .bss           0x000000008011167c        0x4 kbd.o
+ .bss           0x0000000080111680        0x4 lapic.o
+                0x0000000080111680                lapic
+ *fill*         0x0000000080111684       0x1c 
+ .bss           0x00000000801116a0       0xc4 log.o
+                0x00000000801116a0                log
+ .bss           0x0000000080111764        0x0 main.o
+ *fill*         0x0000000080111764       0x1c 
+ .bss           0x0000000080111780      0x5a0 mp.o
+                0x0000000080111780                ioapicid
+                0x0000000080111784                ncpu
+                0x00000000801117a0                cpus
+ .bss           0x0000000080111d20        0x0 picirq.o
+ .bss           0x0000000080111d20        0x0 pipe.o
+ .bss           0x0000000080111d20     0x1f38 proc.o
+                0x0000000080111d20                ptable
+ .bss           0x0000000080113c58        0x0 sleeplock.o
+ .bss           0x0000000080113c58        0x0 spinlock.o
+ .bss           0x0000000080113c58        0x0 string.o
+ .bss           0x0000000080113c58        0x0 swtch.o
+ .bss           0x0000000080113c58        0x0 syscall.o
+ .bss           0x0000000080113c58        0x0 sysfile.o
+ .bss           0x0000000080113c58        0x0 sysproc.o
+ .bss           0x0000000080113c58        0x0 trapasm.o
+ *fill*         0x0000000080113c58        0x8 
+ .bss           0x0000000080113c60      0x860 trap.o
+                0x0000000080113c60                ticks
+                0x0000000080113c80                tickslock
+                0x0000000080113cc0                idt
+ .bss           0x00000000801144c0        0x4 uart.o
+ .bss           0x00000000801144c4        0x0 vectors.o
+ .bss           0x00000000801144c4        0x4 vm.o
+                0x00000000801144c4                kpgdir
+ *fill*         0x00000000801144c8        0x8 
+ COMMON         0x00000000801144d0     0x1000 entry.o
+                0x00000000801144d0                stack
+                0x00000000801154d0                PROVIDE (end = .)
+
+/DISCARD/
+ *(.eh_frame .note.GNU-stack)
+LOAD entry.o
+LOAD bio.o
+LOAD console.o
+LOAD exec.o
+LOAD file.o
+LOAD fs.o
+LOAD ide.o
+LOAD ioapic.o
+LOAD kalloc.o
+LOAD kbd.o
+LOAD lapic.o
+LOAD log.o
+LOAD main.o
+LOAD mp.o
+LOAD picirq.o
+LOAD pipe.o
+LOAD proc.o
+LOAD sleeplock.o
+LOAD spinlock.o
+LOAD string.o
+LOAD swtch.o
+LOAD syscall.o
+LOAD sysfile.o
+LOAD sysproc.o
+LOAD trapasm.o
+LOAD trap.o
+LOAD uart.o
+LOAD vectors.o
+LOAD vm.o
+TARGET(binary)
+LOAD initcode
+LOAD entryother
+OUTPUT(kernel elf32-i386)
+
+.debug_line     0x0000000000000000     0x6bd9
+ .debug_line    0x0000000000000000       0x41 entry.o
+ .debug_line    0x0000000000000041      0x249 bio.o
+ .debug_line    0x000000000000028a      0x949 console.o
+ .debug_line    0x0000000000000bd3      0x2da exec.o
+ .debug_line    0x0000000000000ead      0x2c7 file.o
+ .debug_line    0x0000000000001174      0xca0 fs.o
+ .debug_line    0x0000000000001e14      0x3f9 ide.o
+ .debug_line    0x000000000000220d      0x1c9 ioapic.o
+ .debug_line    0x00000000000023d6      0x20c kalloc.o
+ .debug_line    0x00000000000025e2      0x189 kbd.o
+ .debug_line    0x000000000000276b      0x7d8 lapic.o
+ .debug_line    0x0000000000002f43      0x3b8 log.o
+ .debug_line    0x00000000000032fb      0x143 main.o
+ .debug_line    0x000000000000343e      0x301 mp.o
+ .debug_line    0x000000000000373f       0x77 picirq.o
+ .debug_line    0x00000000000037b6      0x328 pipe.o
+ .debug_line    0x0000000000003ade      0xa39 proc.o
+ .debug_line    0x0000000000004517      0x139 sleeplock.o
+ .debug_line    0x0000000000004650      0x39b spinlock.o
+ .debug_line    0x00000000000049eb      0x29f string.o
+ .debug_line    0x0000000000004c8a       0x43 swtch.o
+ .debug_line    0x0000000000004ccd      0x300 syscall.o
+ .debug_line    0x0000000000004fcd      0x8d7 sysfile.o
+ .debug_line    0x00000000000058a4      0x178 sysproc.o
+ .debug_line    0x0000000000005a1c       0x48 trapasm.o
+ .debug_line    0x0000000000005a64      0x29f trap.o
+ .debug_line    0x0000000000005d03      0x2af uart.o
+ .debug_line    0x0000000000005fb2      0x32f vectors.o
+ .debug_line    0x00000000000062e1      0x8f8 vm.o
+
+.debug_info     0x0000000000000000    0x10ef1
+ .debug_info    0x0000000000000000       0x26 entry.o
+ .debug_info    0x0000000000000026      0x457 bio.o
+ .debug_info    0x000000000000047d     0x136b console.o
+ .debug_info    0x00000000000017e8      0x853 exec.o
+ .debug_info    0x000000000000203b      0x751 file.o
+ .debug_info    0x000000000000278c     0x1dcf fs.o
+ .debug_info    0x000000000000455b      0xe76 ide.o
+ .debug_info    0x00000000000053d1      0x29d ioapic.o
+ .debug_info    0x000000000000566e      0x3a1 kalloc.o
+ .debug_info    0x0000000000005a0f      0x21c kbd.o
+ .debug_info    0x0000000000005c2b      0xe61 lapic.o
+ .debug_info    0x0000000000006a8c      0x762 log.o
+ .debug_info    0x00000000000071ee      0xa28 main.o
+ .debug_info    0x0000000000007c16      0xd85 mp.o
+ .debug_info    0x000000000000899b       0xe9 picirq.o
+ .debug_info    0x0000000000008a84      0xa1f pipe.o
+ .debug_info    0x00000000000094a3     0x153b proc.o
+ .debug_info    0x000000000000a9de      0x88a sleeplock.o
+ .debug_info    0x000000000000b268      0xb29 spinlock.o
+ .debug_info    0x000000000000bd91      0x41f string.o
+ .debug_info    0x000000000000c1b0       0x26 swtch.o
+ .debug_info    0x000000000000c1d6      0x863 syscall.o
+ .debug_info    0x000000000000ca39     0x17b7 sysfile.o
+ .debug_info    0x000000000000e1f0      0x5c1 sysproc.o
+ .debug_info    0x000000000000e7b1       0x26 trapasm.o
+ .debug_info    0x000000000000e7d7      0xb0b trap.o
+ .debug_info    0x000000000000f2e2      0x550 uart.o
+ .debug_info    0x000000000000f832       0x26 vectors.o
+ .debug_info    0x000000000000f858     0x1699 vm.o
+
+.debug_abbrev   0x0000000000000000     0x44c9
+ .debug_abbrev  0x0000000000000000       0x14 entry.o
+ .debug_abbrev  0x0000000000000014      0x25f bio.o
+ .debug_abbrev  0x0000000000000273      0x4dc console.o
+ .debug_abbrev  0x000000000000074f      0x1e8 exec.o
+ .debug_abbrev  0x0000000000000937      0x250 file.o
+ .debug_abbrev  0x0000000000000b87      0x5d2 fs.o
+ .debug_abbrev  0x0000000000001159      0x310 ide.o
+ .debug_abbrev  0x0000000000001469      0x1e7 ioapic.o
+ .debug_abbrev  0x0000000000001650      0x269 kalloc.o
+ .debug_abbrev  0x00000000000018b9      0x174 kbd.o
+ .debug_abbrev  0x0000000000001a2d      0x292 lapic.o
+ .debug_abbrev  0x0000000000001cbf      0x294 log.o
+ .debug_abbrev  0x0000000000001f53      0x2b3 main.o
+ .debug_abbrev  0x0000000000002206      0x2d4 mp.o
+ .debug_abbrev  0x00000000000024da       0xa7 picirq.o
+ .debug_abbrev  0x0000000000002581      0x235 pipe.o
+ .debug_abbrev  0x00000000000027b6      0x4cf proc.o
+ .debug_abbrev  0x0000000000002c85      0x1ea sleeplock.o
+ .debug_abbrev  0x0000000000002e6f      0x2e4 spinlock.o
+ .debug_abbrev  0x0000000000003153      0x145 string.o
+ .debug_abbrev  0x0000000000003298       0x14 swtch.o
+ .debug_abbrev  0x00000000000032ac      0x289 syscall.o
+ .debug_abbrev  0x0000000000003535      0x3bc sysfile.o
+ .debug_abbrev  0x00000000000038f1      0x1bf sysproc.o
+ .debug_abbrev  0x0000000000003ab0       0x14 trapasm.o
+ .debug_abbrev  0x0000000000003ac4      0x2b1 trap.o
+ .debug_abbrev  0x0000000000003d75      0x1e9 uart.o
+ .debug_abbrev  0x0000000000003f5e       0x14 vectors.o
+ .debug_abbrev  0x0000000000003f72      0x557 vm.o
+
+.debug_aranges  0x0000000000000000      0x3b0
+ .debug_aranges
+                0x0000000000000000       0x20 entry.o
+ .debug_aranges
+                0x0000000000000020       0x20 bio.o
+ .debug_aranges
+                0x0000000000000040       0x20 console.o
+ .debug_aranges
+                0x0000000000000060       0x20 exec.o
+ .debug_aranges
+                0x0000000000000080       0x20 file.o
+ .debug_aranges
+                0x00000000000000a0       0x20 fs.o
+ .debug_aranges
+                0x00000000000000c0       0x20 ide.o
+ .debug_aranges
+                0x00000000000000e0       0x20 ioapic.o
+ .debug_aranges
+                0x0000000000000100       0x20 kalloc.o
+ .debug_aranges
+                0x0000000000000120       0x20 kbd.o
+ .debug_aranges
+                0x0000000000000140       0x20 lapic.o
+ .debug_aranges
+                0x0000000000000160       0x20 log.o
+ .debug_aranges
+                0x0000000000000180       0x28 main.o
+ .debug_aranges
+                0x00000000000001a8       0x20 mp.o
+ .debug_aranges
+                0x00000000000001c8       0x20 picirq.o
+ .debug_aranges
+                0x00000000000001e8       0x20 pipe.o
+ .debug_aranges
+                0x0000000000000208       0x20 proc.o
+ .debug_aranges
+                0x0000000000000228       0x20 sleeplock.o
+ .debug_aranges
+                0x0000000000000248       0x20 spinlock.o
+ .debug_aranges
+                0x0000000000000268       0x20 string.o
+ .debug_aranges
+                0x0000000000000288       0x20 swtch.o
+ .debug_aranges
+                0x00000000000002a8       0x20 syscall.o
+ .debug_aranges
+                0x00000000000002c8       0x20 sysfile.o
+ .debug_aranges
+                0x00000000000002e8       0x20 sysproc.o
+ .debug_aranges
+                0x0000000000000308       0x20 trapasm.o
+ .debug_aranges
+                0x0000000000000328       0x20 trap.o
+ .debug_aranges
+                0x0000000000000348       0x20 uart.o
+ .debug_aranges
+                0x0000000000000368       0x20 vectors.o
+ .debug_aranges
+                0x0000000000000388       0x28 vm.o
+
+.debug_str      0x0000000000000000      0xdfa
+ .debug_str     0x0000000000000000       0x37 entry.o
+ .debug_str     0x0000000000000037      0x1b1 bio.o
+                                        0x1e2 (松开之前的大小)
+ .debug_str     0x00000000000001e8      0x29e console.o
+                                        0x45a (松开之前的大小)
+ .debug_str     0x0000000000000486      0x11a exec.o
+                                        0x334 (松开之前的大小)
+ .debug_str     0x00000000000005a0       0x77 file.o
+                                        0x26a (松开之前的大小)
+ .debug_str     0x0000000000000617       0xec fs.o
+                                        0x500 (松开之前的大小)
+ .debug_str     0x0000000000000703       0x80 ide.o
+                                        0x3c7 (松开之前的大小)
+ .debug_str     0x0000000000000783       0x3a ioapic.o
+                                        0x160 (松开之前的大小)
+ .debug_str     0x00000000000007bd       0x48 kalloc.o
+                                        0x18c (松开之前的大小)
+ .debug_str     0x0000000000000805       0x4e kbd.o
+                                        0x16b (松开之前的大小)
+ .debug_str     0x0000000000000853       0x89 lapic.o
+                                        0x1bb (松开之前的大小)
+ .debug_str     0x00000000000008dc       0x85 log.o
+                                        0x2a1 (松开之前的大小)
+ .debug_str     0x0000000000000961       0xbe main.o
+                                        0x3e9 (松开之前的大小)
+ .debug_str     0x0000000000000a1f       0xa8 mp.o
+                                        0x3b2 (松开之前的大小)
+ .debug_str     0x0000000000000ac7      0x119 picirq.o
+ .debug_str     0x0000000000000ac7       0x2a pipe.o
+                                        0x3ad (松开之前的大小)
+ .debug_str     0x0000000000000af1       0xdb proc.o
+                                        0x4af (松开之前的大小)
+ .debug_str     0x0000000000000bcc      0x315 sleeplock.o
+ .debug_str     0x0000000000000bcc      0x31a spinlock.o
+ .debug_str     0x0000000000000bcc       0x13 string.o
+                                        0x15a (松开之前的大小)
+ .debug_str     0x0000000000000bdf        0x8 swtch.o
+                                         0x37 (松开之前的大小)
+ .debug_str     0x0000000000000be7      0x101 syscall.o
+                                        0x303 (松开之前的大小)
+ .debug_str     0x0000000000000ce8       0x31 sysfile.o
+                                        0x4d1 (松开之前的大小)
+ .debug_str     0x0000000000000d19       0x18 sysproc.o
+                                        0x29b (松开之前的大小)
+ .debug_str     0x0000000000000d31        0xa trapasm.o
+                                         0x39 (松开之前的大小)
+ .debug_str     0x0000000000000d3b       0x41 trap.o
+                                        0x375 (松开之前的大小)
+ .debug_str     0x0000000000000d7c        0xe uart.o
+                                        0x16d (松开之前的大小)
+ .debug_str     0x0000000000000d8a        0xa vectors.o
+                                         0x39 (松开之前的大小)
+ .debug_str     0x0000000000000d94       0x66 vm.o
+                                        0x3ee (松开之前的大小)
+
+.debug_loclists
+                0x0000000000000000     0x5175
+ .debug_loclists
+                0x0000000000000000       0xe5 bio.o
+ .debug_loclists
+                0x00000000000000e5      0x8a4 console.o
+ .debug_loclists
+                0x0000000000000989      0x28d exec.o
+ .debug_loclists
+                0x0000000000000c16      0x35c file.o
+ .debug_loclists
+                0x0000000000000f72      0xd92 fs.o
+ .debug_loclists
+                0x0000000000001d04      0x2ac ide.o
+ .debug_loclists
+                0x0000000000001fb0       0xb4 ioapic.o
+ .debug_loclists
+                0x0000000000002064      0x19a kalloc.o
+ .debug_loclists
+                0x00000000000021fe       0x65 kbd.o
+ .debug_loclists
+                0x0000000000002263      0x5b0 lapic.o
+ .debug_loclists
+                0x0000000000002813      0x159 log.o
+ .debug_loclists
+                0x000000000000296c       0x66 main.o
+ .debug_loclists
+                0x00000000000029d2      0x305 mp.o
+ .debug_loclists
+                0x0000000000002cd7       0x34 picirq.o
+ .debug_loclists
+                0x0000000000002d0b      0x16d pipe.o
+ .debug_loclists
+                0x0000000000002e78      0x480 proc.o
+ .debug_loclists
+                0x00000000000032f8       0x45 sleeplock.o
+ .debug_loclists
+                0x000000000000333d      0x15e spinlock.o
+ .debug_loclists
+                0x000000000000349b      0x443 string.o
+ .debug_loclists
+                0x00000000000038de      0x1c2 syscall.o
+ .debug_loclists
+                0x0000000000003aa0      0x523 sysfile.o
+ .debug_loclists
+                0x0000000000003fc3       0x3c sysproc.o
+ .debug_loclists
+                0x0000000000003fff       0x4c trap.o
+ .debug_loclists
+                0x000000000000404b      0x1b7 uart.o
+ .debug_loclists
+                0x0000000000004202      0xf73 vm.o
+
+.debug_rnglists
+                0x0000000000000000      0x899
+ .debug_rnglists
+                0x0000000000000000       0x17 bio.o
+ .debug_rnglists
+                0x0000000000000017       0xe8 console.o
+ .debug_rnglists
+                0x00000000000000ff       0x17 file.o
+ .debug_rnglists
+                0x0000000000000116       0xad fs.o
+ .debug_rnglists
+                0x00000000000001c3       0x63 ide.o
+ .debug_rnglists
+                0x0000000000000226       0x42 ioapic.o
+ .debug_rnglists
+                0x0000000000000268       0x22 kalloc.o
+ .debug_rnglists
+                0x000000000000028a       0x16 kbd.o
+ .debug_rnglists
+                0x00000000000002a0      0x223 lapic.o
+ .debug_rnglists
+                0x00000000000004c3       0x40 log.o
+ .debug_rnglists
+                0x0000000000000503       0x1a main.o
+ .debug_rnglists
+                0x000000000000051d       0x4c mp.o
+ .debug_rnglists
+                0x0000000000000569       0x6f proc.o
+ .debug_rnglists
+                0x00000000000005d8       0x53 spinlock.o
+ .debug_rnglists
+                0x000000000000062b       0x16 string.o
+ .debug_rnglists
+                0x0000000000000641       0x4d syscall.o
+ .debug_rnglists
+                0x000000000000068e       0x92 sysfile.o
+ .debug_rnglists
+                0x0000000000000720       0x1c trap.o
+ .debug_rnglists
+                0x000000000000073c       0x6c uart.o
+ .debug_rnglists
+                0x00000000000007a8       0xf1 vm.o
+
+.debug_line_str
+                0x0000000000000000      0x13d
+ .debug_line_str
+                0x0000000000000000       0x55 bio.o
+                                         0x84 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000055       0x24 console.o
+                                         0xa4 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000079        0xd exec.o
+                                         0x7d (松开之前的大小)
+ .debug_line_str
+                0x0000000000000086        0xd file.o
+                                         0x88 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000086        0xc fs.o
+                                         0xa1 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000092        0x6 ide.o
+                                         0x97 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000098        0x9 ioapic.o
+                                         0x70 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000a1        0x9 kalloc.o
+                                         0x7b (松开之前的大小)
+ .debug_line_str
+                0x00000000000000aa        0xc kbd.o
+                                         0x73 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000b6        0xf lapic.o
+                                         0x7a (松开之前的大小)
+ .debug_line_str
+                0x00000000000000c5        0x6 log.o
+                                         0x89 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000cb        0x7 main.o
+                                         0x7d (松开之前的大小)
+ .debug_line_str
+                0x00000000000000d2        0xa mp.o
+                                         0x7c (松开之前的大小)
+ .debug_line_str
+                0x00000000000000dc        0x9 picirq.o
+                                         0x6f (松开之前的大小)
+ .debug_line_str
+                0x00000000000000e5        0x7 pipe.o
+                                         0x95 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000ec        0x7 proc.o
+                                         0x88 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000ec        0xc sleeplock.o
+                                         0xa3 (松开之前的大小)
+ .debug_line_str
+                0x00000000000000f8        0xb spinlock.o
+                                         0x94 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000103        0x9 string.o
+                                         0x6f (松开之前的大小)
+ .debug_line_str
+                0x000000000000010c        0xa syscall.o
+                                         0x80 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000116        0xa sysfile.o
+                                         0xaa (松开之前的大小)
+ .debug_line_str
+                0x0000000000000120        0xa sysproc.o
+                                         0x80 (松开之前的大小)
+ .debug_line_str
+                0x000000000000012a        0x7 trap.o
+                                         0x88 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000131        0x7 uart.o
+                                         0x70 (松开之前的大小)
+ .debug_line_str
+                0x0000000000000138        0x5 vm.o
+                                         0x77 (松开之前的大小)
+
+.comment        0x0000000000000000       0x2b
+ .comment       0x0000000000000000       0x2b bio.o
+                                         0x2c (松开之前的大小)
+ .comment       0x000000000000002b       0x2c console.o
+ .comment       0x000000000000002b       0x2c exec.o
+ .comment       0x000000000000002b       0x2c file.o
+ .comment       0x000000000000002b       0x2c fs.o
+ .comment       0x000000000000002b       0x2c ide.o
+ .comment       0x000000000000002b       0x2c ioapic.o
+ .comment       0x000000000000002b       0x2c kalloc.o
+ .comment       0x000000000000002b       0x2c kbd.o
+ .comment       0x000000000000002b       0x2c lapic.o
+ .comment       0x000000000000002b       0x2c log.o
+ .comment       0x000000000000002b       0x2c main.o
+ .comment       0x000000000000002b       0x2c mp.o
+ .comment       0x000000000000002b       0x2c picirq.o
+ .comment       0x000000000000002b       0x2c pipe.o
+ .comment       0x000000000000002b       0x2c proc.o
+ .comment       0x000000000000002b       0x2c sleeplock.o
+ .comment       0x000000000000002b       0x2c spinlock.o
+ .comment       0x000000000000002b       0x2c string.o
+ .comment       0x000000000000002b       0x2c syscall.o
+ .comment       0x000000000000002b       0x2c sysfile.o
+ .comment       0x000000000000002b       0x2c sysproc.o
+ .comment       0x000000000000002b       0x2c trap.o
+ .comment       0x000000000000002b       0x2c uart.o
+ .comment       0x000000000000002b       0x2c vm.o

@@ -87,6 +87,8 @@ struct segdesc {
 #define PTXSHIFT        12      // offset of PTX in a linear address
 #define PDXSHIFT        22      // offset of PDX in a linear address => 2^22=4M
 
+// PGROUNDUP 为往上4k地址对齐，相当于可以把一个地址转换为比此地址高的4k地址. (620+(4096-1)& ~(4095)) => 4096
+// PGROUNDDOWN 为往下4k地址对齐，相当于可以把一个地址转换为比此地址低的4k地址.  (2400 & ~(4095)) => 0
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
@@ -97,8 +99,8 @@ struct segdesc {
 #define PTE_PS          0x080   // Page Size
 
 // Address in page table or page directory entry
-#define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
-#define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF)
+#define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF) // 获取PTE的物理地址
+#define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF) // 获取页属性
 
 #ifndef __ASSEMBLER__
 typedef uint pte_t;
