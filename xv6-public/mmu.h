@@ -99,7 +99,7 @@ struct segdesc {
 #define PTE_PS          0x080   // Page Size
 
 // Address in page table or page directory entry
-#define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF) // 获取PTE的物理地址
+#define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF) // 获取PTE的物理地址. 因4k对齐, 低12位始终为0, 用于存储页属性
 #define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF) // 获取页属性
 
 #ifndef __ASSEMBLER__
