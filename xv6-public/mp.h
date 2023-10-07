@@ -7,7 +7,7 @@ struct mp {             // floating pointer
   uchar specrev;                // [14]
   uchar checksum;               // all bytes must add up to 0
   uchar type;                   // MP system config type
-  uchar imcrp;
+  uchar imcrp;                  //只使用了第7位，0表示pic模式，1表示apic模式
   uchar reserved[3];
 };
 

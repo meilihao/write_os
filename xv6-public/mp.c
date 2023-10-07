@@ -45,6 +45,8 @@ mpsearch1(uint a, int len)
 // 1) in the first KB of the EBDA;
 // 2) in the last KB of system base memory;
 // 3) in the BIOS ROM between 0xE0000 and 0xFFFFF.
+// 寻找mp floating pointer 结构, 与查找acpi rsdp类似(mp floating pointer在acpi rsdp里)
+// [实例讲解多处理器下(xv6)的计算机启动](https://zhuanlan.zhihu.com/p/394247844)
 static struct mp*
 mpsearch(void)
 {
@@ -53,15 +55,15 @@ mpsearch(void)
   struct mp *mp;
 
   bda = (uchar *) P2V(0x400);
-  if((p = ((bda[0x0F]<<8)| bda[0x0E]) << 4)){
+  if((p = ((bda[0x0F]<<8)| bda[0x0E]) << 4)){ // 在EBDA中最开始1K中寻找
     if((mp = mpsearch1(p, 1024)))
       return mp;
   } else {
-    p = ((bda[0x14]<<8)|bda[0x13])*1024;
+    p = ((bda[0x14]<<8)|bda[0x13])*1024; // 在系统基础内存的最后1K中查找
     if((mp = mpsearch1(p-1024, 1024)))
       return mp;
   }
-  return mpsearch1(0xF0000, 0x10000);
+  return mpsearch1(0xF0000, 0x10000); // 在BOIS ROM地址空间中(0F0000h 到 0FFFFFh)
 }
 
 // Search for an MP configuration table.  For now,
@@ -88,6 +90,7 @@ mpconfig(struct mp **pmp)
   return conf;
 }
 
+// MP表基本上已经过时了. ACPI MADT表是配置多处理器系统的真正信息来源
 void
 mpinit(void)
 {
@@ -102,9 +105,9 @@ mpinit(void)
     panic("Expect to run on an SMP");
   ismp = 1;
   lapic = (uint*)conf->lapicaddr;
-  for(p=(uchar*)(conf+1), e=(uchar*)conf+conf->length; p<e; ){
+  for(p=(uchar*)(conf+1), e=(uchar*)conf+conf->length; p<e; ){ //跳过表头，从第一个表项开始for循环
     switch(*p){
-    case MPPROC:
+    case MPPROC: // 如果是处理器
       proc = (struct mpproc*)p;
       if(ncpu < NCPU) {
         cpus[ncpu].apicid = proc->apicid;  // apicid may differ from ncpu
@@ -134,6 +137,6 @@ mpinit(void)
     // Bochs doesn't support IMCR, so this doesn't run on Bochs.
     // But it would on real hardware.
     outb(0x22, 0x70);   // Select IMCR
-    outb(0x23, inb(0x23) | 1);  // Mask external interrupts.
+    outb(0x23, inb(0x23) | 1);  // Mask external interrupts. // setting the IMCR 0x1 is one step jumping from PIC mode to Symmetric I/O mode, making the CPU receiving IRQs from local APIC, not directly from 8259A PIC
   }
 }
