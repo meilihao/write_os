@@ -29,7 +29,7 @@ pinit(void)
 // Must be called with interrupts disabled
 int
 cpuid() {
-  return mycpu()-cpus;
+  return mycpu()-cpus; // 获取mycpu在cpus的偏移
 }
 
 // Must be called with interrupts disabled to avoid the caller being

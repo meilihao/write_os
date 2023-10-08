@@ -27,7 +27,7 @@
 #define T_SYSCALL       64      // system call
 #define T_DEFAULT      500      // catchall
 
-#define T_IRQ0          32      // IRQ 0 corresponds to int T_IRQ
+#define T_IRQ0          32      // IRQ 0 corresponds to int T_IRQ // 在x86体系中，中断向量0~31已经被intel使用，用户自定义的向量号从32~255
 
 #define IRQ_TIMER        0
 #define IRQ_KBD          1

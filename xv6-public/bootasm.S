@@ -20,7 +20,7 @@ start:
 
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.
-  # 不过某些BIOS, 包括模拟器（qemu, Bochs等）会默认打开A20地址线, 不需要手动开启
+  # 为了访问1MB以上的内存空间，需要使能A20地址线. 不过某些BIOS, 包括模拟器（qemu, Bochs等）会默认打开A20地址线, 不需要手动开启
   # 这里是通过键盘控制器的8042芯片开启A20
   # 0x64(read=Status Register; write=Command Register)
 seta20.1:
@@ -82,7 +82,7 @@ spin:
 .p2align 2                                # force 4 byte alignment
 gdt:
   SEG_NULLASM                             # null seg
-  SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg 0xffffffff=4G
+  SEG_ASM(STA_X|STA_R, 0x0, 0xffffffff)   # code seg 0xffffffff=4G # SEG_ASM from asm.h
   SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
 
 gdtdesc:

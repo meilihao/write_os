@@ -12,6 +12,7 @@ pde_t *kpgdir;  // for use in scheduler()
 
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
+// 用于设置每个cpu自己的GDT全局描述符表
 void
 seginit(void)
 {
@@ -104,6 +105,7 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 
 // This table defines the kernel's mappings, which are present in
 // every process's page table.
+// data符号地址是页对齐的。同时data表示的就是内核数据区起始的虚拟地址
 static struct kmap {
   void *virt;
   uint phys_start;
@@ -130,7 +132,7 @@ setupkvm(void)
   if((pgdir = (pde_t*)kalloc()) == 0)
     return 0;
   memset(pgdir, 0, PGSIZE);
-  if (P2V(PHYSTOP) > (void*)DEVSPACE)
+  if (P2V(PHYSTOP) > (void*)DEVSPACE) // 检查xv6所支持的总内存大小
     panic("PHYSTOP too high");
   for(k = kmap; k < &kmap[NELEM(kmap)]; k++)
     if(mappages(pgdir, k->virt, k->phys_end - k->phys_start, // 推测0-DEVSPACE空间=DEVSPACE~4G
@@ -295,7 +297,7 @@ freevm(pde_t *pgdir)
 
   if(pgdir == 0)
     panic("freevm: no pgdir");
-  deallocuvm(pgdir, KERNBASE, 0); // 释放所有分配的页
+  deallocuvm(pgdir, KERNBASE, 0); // ???释放所有分配的页
   for(i = 0; i < NPDENTRIES; i++){ // 释放所有分配的页表页
     if(pgdir[i] & PTE_P){
       char * v = P2V(PTE_ADDR(pgdir[i]));

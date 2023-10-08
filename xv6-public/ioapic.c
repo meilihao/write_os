@@ -45,25 +45,29 @@ ioapicwrite(int reg, uint data)
   ioapic->data = data;
 }
 
+// [Xv6内核分析(三.6)](http://www.databusworld.cn/9348.html)
+// 初始化24个I/O REDIRECTION TABLE
 void
 ioapicinit(void)
 {
   int i, id, maxintr;
 
   ioapic = (volatile struct ioapic*)IOAPIC;
-  maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
-  id = ioapicread(REG_ID) >> 24;
+  maxintr = (ioapicread(REG_VER) >> 16) & 0xFF; // 读取REG_VER以获得重定位入口的数量, 见"IOAPIC VERSION REGISTER"
+  id = ioapicread(REG_ID) >> 24; // 读取REG_ID寄存器获得当前ioapic的id
   if(id != ioapicid)
     cprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
 
   // Mark all interrupts edge-triggered, active high, disabled,
   // and not routed to any CPUs.
+  // 每个ioapic共有24个I/O REDIRECTION TABLE，每个table是8个字节, 这里分两次写4*2=8
   for(i = 0; i <= maxintr; i++){
     ioapicwrite(REG_TABLE+2*i, INT_DISABLED | (T_IRQ0 + i));
     ioapicwrite(REG_TABLE+2*i+1, 0);
   }
 }
 
+// 根据irq设置相应的I/O REDIRECTION TABLE，并且设置对应中断要分发的cpu
 void
 ioapicenable(int irq, int cpunum)
 {

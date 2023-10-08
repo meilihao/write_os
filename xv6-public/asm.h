@@ -11,6 +11,7 @@
 // 0x90=1001 0000: P=1, in memery; S=1, code or data
 // 0xC0=1100 0000: G=1, 4k; D/B=1, 32bit segment
 // seg_len = seg_limit*g = 0xfffff(20b) * 4k
+// seg_limit = (lim) >> 12
 #define SEG_ASM(type,base,lim)                                  \
         .word (((lim) >> 12) & 0xffff), ((base) & 0xffff);      \
         .byte (((base) >> 16) & 0xff), (0x90 | (type)),         \

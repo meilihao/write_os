@@ -7,6 +7,7 @@
 #define IO_PIC2         0xA0    // Slave (IRQs 8-15)
 
 // Don't use the 8259A interrupt controllers.  Xv6 assumes SMP hardware.
+// xv6使用的是apic，所以禁止了一切pic上的中断
 void
 picinit(void)
 {

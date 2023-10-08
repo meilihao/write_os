@@ -11,6 +11,7 @@
 #include "x86.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
+// 寄存器的偏移需要除以4，用作lapic数组的下标来访问寄存器
 #define ID      (0x0020/4)   // ID
 #define VER     (0x0030/4)   // Version
 #define TPR     (0x0080/4)   // Task Priority
@@ -51,6 +52,10 @@ lapicw(int index, int value)
   lapic[ID];  // wait for write to finish, by reading
 }
 
+// [Xv6内核分析(三.3)](http://www.databusworld.cn/9296.html)
+// lapic寄存器的描述可以在Intel开发手册第三卷第10章找到
+// lapic寄存器空间总共有4KB大小，被映射到0xFEE00000开始的物理地址空间
+// 访问lapic寄存器时，寄存器的地址必须是16字节对齐的，每次访问一般是4字节访问
 void
 lapicinit(void)
 {
@@ -58,22 +63,25 @@ lapicinit(void)
     return;
 
   // Enable local APIC; set spurious interrupt vector.
-  lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS));
+  lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS)); // 设置SVR寄存器
 
   // The timer repeatedly counts down at bus frequency
   // from lapic[TICR] and then issues an interrupt.
   // If xv6 cared more about precise timekeeping,
   // TICR would be calibrated using an external time source.
+  // 设置lapic定时器
   lapicw(TDCR, X1);
-  lapicw(TIMER, PERIODIC | (T_IRQ0 + IRQ_TIMER));
+  lapicw(TIMER, PERIODIC | (T_IRQ0 + IRQ_TIMER)); // timer mode被设置为了periodic; 中断向量号被设置为了T_IRQ0 + IRQ_TIMER
   lapicw(TICR, 10000000);
 
   // Disable logical interrupt lines.
+  // LINT0和LINT1这两个寄存器，它们对应到Local APIC模块的INTR和NMI引脚，外部的中断会引发这两个寄存器的中断发起. xv6不使用它们
   lapicw(LINT0, MASKED);
   lapicw(LINT1, MASKED);
 
   // Disable performance counter overflow interrupts
   // on machines that provide that interrupt entry.
+  // 大于等于4，表示当前cpu支持性能计数中断，否则不支持。如果支持，则操作PCINT寄存器屏蔽此中断
   if(((lapic[VER]>>16) & 0xFF) >= 4)
     lapicw(PCINT, MASKED);
 
@@ -81,6 +89,7 @@ lapicinit(void)
   lapicw(ERROR, T_IRQ0 + IRQ_ERROR);
 
   // Clear error status register (requires back-to-back writes).
+  // 向此寄存器写值可以更新错误寄存器的状态，所以连续写两次寄存器就相当于清除状态寄存器了. 另外此寄存器时可读的，但是读之前必须要先写此寄存器
   lapicw(ESR, 0);
   lapicw(ESR, 0);
 
@@ -88,15 +97,19 @@ lapicinit(void)
   lapicw(EOI, 0);
 
   // Send an Init Level De-Assert to synchronise arbitration ID's.
+  // 设置ICR中断命令寄存器，从而设置IPI中断属性
+  // ICR寄存器是用来设置核间中断（IPI）的属性的
   lapicw(ICRHI, 0);
   lapicw(ICRLO, BCAST | INIT | LEVEL);
-  while(lapic[ICRLO] & DELIVS)
+  while(lapic[ICRLO] & DELIVS) // 设置后等待Delivery Status为空闲状态
     ;
 
   // Enable interrupts on the APIC (but not on the processor).
+  // 设置TPR任务优先级. 打开 CPU 的 LAPIC 的中断，这使得 LAPIC 能够将中断传递给本地处理器
   lapicw(TPR, 0);
 }
 
+// 读取lapic空间中的ID寄存器，然后获得lapicid
 int
 lapicid(void)
 {

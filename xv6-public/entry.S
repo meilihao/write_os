@@ -46,7 +46,7 @@ _start = V2P_WO(entry) // 还未开启分页, entry是VirtualAddr
 entry:
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax
-  orl     $(CR4_PSE), %eax
+  orl     $(CR4_PSE), %eax # PSE位为0表示每页是4KB,为1表示每页是4MB
   movl    %eax, %cr4
   # Set page directory
   movl    $(V2P_WO(entrypgdir)), %eax # entrypgdir 在 main.c
@@ -66,4 +66,4 @@ entry:
   mov $main, %eax // main.c
   jmp *%eax
 
-.comm stack, KSTACKSIZE // 在内核 bbs 段开辟了一段 KSTACKSIZE = 4096 = 4KB 大小的内核栈并将栈顶设置为这段数据区域的末尾处（栈是自上而下增长）
+.comm stack, KSTACKSIZE // .comm:声明未初始化的通用内存区域. 在内核 bbs 段开辟了一段 KSTACKSIZE = 4096 = 4KB 大小的内核栈并将栈顶设置为这段数据区域的末尾处（栈是自上而下增长）
