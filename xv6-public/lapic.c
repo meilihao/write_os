@@ -138,37 +138,42 @@ microdelay(int us)
 
 // Start additional processor running entry code at addr.
 // See Appendix B of MultiProcessor Specification.
+// BSP通过向AP逐个发送中断来启动AP，首先发送INIT中断来初始化AP，然后发送SIPI中断来启动AP，发送中断使用的是写ICR寄存器的方式
 void
 lapicstartap(uchar apicid, uint addr)
 {
   int i;
   ushort *wrv;
 
+  // 设置CMOS的shutdown code寄存器，设置从核运行的code地址
   // "The BSP must initialize CMOS shutdown code to 0AH
   // and the warm reset vector (DWORD based at 40:67) to point at
   // the AP startup code prior to the [universal startup algorithm]."
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
-  wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
+  wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector // 设置warm reset vector，warm reset vector表示从核启动的地址，warm reset vector本身所在的物理地址是0x467
   wrv[0] = 0;
   wrv[1] = addr >> 4;
 
   // "Universal startup algorithm."
   // Send INIT (level-triggered) interrupt to reset other CPU.
-  lapicw(ICRHI, apicid<<24);
-  lapicw(ICRLO, INIT | LEVEL | ASSERT);
+  // 发送INIT中断以重置AP
+  // 中断命令寄存器（ICR）是一个 64 位本地 APIC寄存器，允许运行在处理器上的软件指定和发送处理器间中断（IPI）给系统中的其它处理器
+  lapicw(ICRHI, apicid<<24); // 将目标CPU的ID写入ICR寄存器的目的地址域中
+  lapicw(ICRLO, INIT | LEVEL | ASSERT); // 在ASSERT的情况下将INIT中断写入ICR寄存器
   microdelay(200);
-  lapicw(ICRLO, INIT | LEVEL);
-  microdelay(100);    // should be 10ms, but too slow in Bochs!
+  lapicw(ICRLO, INIT | LEVEL); // //在非ASSERT的情况下将INIT中断写入ICR寄存器
+  microdelay(100);    // should be 10ms, but too slow in Bochs! // 等待100ms (INTEL官方手册规定的是10ms,但是由于Bochs运行较慢，此处改为100ms)
 
   // Send startup IPI (twice!) to enter code.
   // Regular hardware is supposed to only accept a STARTUP
   // when it is in the halted state due to an INIT.  So the second
   // should be ignored, but it is part of the official Intel algorithm.
   // Bochs complains about the second one.  Too bad for Bochs.
+  // INTEL官方规定发送两次startup IPI中断
   for(i = 0; i < 2; i++){
-    lapicw(ICRHI, apicid<<24);
-    lapicw(ICRLO, STARTUP | (addr>>12));
+    lapicw(ICRHI, apicid<<24); // 将目标CPU的ID写入ICR寄存器的目的地址域中
+    lapicw(ICRLO, STARTUP | (addr>>12)); // 将SIPI中断写入ICR寄存器的传送模式域中，将启动代码写入向量域中. 这个物理地址一定要是4KB对齐的，所以addr右移了12位
     microdelay(200);
   }
 }

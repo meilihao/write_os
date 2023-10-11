@@ -60,10 +60,14 @@ mpmain(void)
 pde_t entrypgdir[];  // For entry.S
 
 // Start the non-boot (AP) processors.
+// 用来启动其他从核运行，大致的思想就是：首先设置好从核需要运行的代码的地址，然后使用核间中断IPI通知从核启动，从核启动后就从设置的代码地址处开始运行
+// 从核的入口代码在entryother.S中，从核运行的代码地址必须在4KB对齐的地方
+// 将entryothers移动到物理地址0x7000处使其能正常运行。因为这是其他CPU最初运行的内核代码，所以没有开启保护模式和分页机制，entryothers将页表设置为entrypgdir，在设置页表前，虚拟地址等于物理地址
+// entryother.S是作为独立的二进制文件与内核二进制文件一起组成整体的ELF文件，通过在LD链接器中-b参数来整合一个独立的二进制文件，在内核中通过_binary_entryother_start和_binary_entryother_size来引用
 static void
 startothers(void)
 {
-  extern uchar _binary_entryother_start[], _binary_entryother_size[];
+  extern uchar _binary_entryother_start[], _binary_entryother_size[]; // entryothers文件在内存中的起始虚拟地址和大小, 由ld赋值
   uchar *code;
   struct cpu *c;
   char *stack;
@@ -81,14 +85,14 @@ startothers(void)
     // Tell entryother.S what stack to use, where to enter, and what
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
-    stack = kalloc();
-    *(void**)(code-4) = stack + KSTACKSIZE;
+    stack = kalloc(); // 为每个AP分配stack（每个CPU都一个自己的stack）
+    *(void**)(code-4) = stack + KSTACKSIZE; // 设置esp, 结合entryother.S看, 比如这里对应其里面的`(start-4)`
     *(void(**)(void))(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
 
-    lapicstartap(c->apicid, V2P(code));
+    lapicstartap(c->apicid, V2P(code)); // 要启动的cpu, 要启动的cpu运行代码的地址
 
-    // wait for cpu to finish mpmain()
+    // wait for cpu to finish mpmain() // mpenter's mpmain
     while(c->started == 0)
       ;
   }

@@ -38,11 +38,12 @@ kinit1(void *vstart, void *vend)
   freerange(vstart, vend);
 }
 
+// 将[4MB,224MB]之间的物理内存页添加到空间页链表之中
 void
 kinit2(void *vstart, void *vend)
 {
   freerange(vstart, vend);
-  kmem.use_lock = 1;
+  kmem.use_lock = 1; // 启用锁机制
 }
 
 void

@@ -49,7 +49,8 @@ fetchstr(uint addr, char **pp)
 int
 argint(int n, int *ip)
 {
-  return fetchint((myproc()->tf->esp) + 4 + 4*n, ip);
+  // proc->tf->esp增加一个ret addr的偏移量即为参数位置
+  return fetchint((myproc()->tf->esp) + 4 + 4*n, ip); // myproc()->tf是trap()的syscall()前设置 .4对应initcode.S's start的`pushl $0`
 }
 
 // Fetch the nth word-sized system call argument as a pointer
@@ -73,6 +74,7 @@ argptr(int n, char **pp, int size)
 // Check that the pointer is valid and the string is nul-terminated.
 // (There is no shared writable memory, so the string can't change
 // between this check and being used by the kernel.)
+// 从用户态获取堆栈参数
 int
 argstr(int n, char **pp)
 {
@@ -136,7 +138,7 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    curproc->tf->eax = syscalls[num]();
+    curproc->tf->eax = syscalls[num](); // syscall返回的值
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

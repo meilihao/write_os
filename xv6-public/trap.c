@@ -19,9 +19,10 @@ tvinit(void)
 {
   int i;
 
+  // 这个idt中断描述符表示被所有的cpu共享的, 所有的IDT中断选择子的RPL都是0，这表示所有的中断都是在内核级别执行的
   for(i = 0; i < 256; i++)
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
-  SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
+  SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER); // 系统调用的中断号是64，系统调用中断描述符被设置为一条陷阱门，DPL设置为用户级别，这样就可以从用户空间调用int指令产生软中断了
 
   initlock(&tickslock, "time");
 }

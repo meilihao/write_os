@@ -149,6 +149,7 @@ lcr3(uint val)
 //PAGEBREAK: 36
 // Layout of the trap frame built on the stack by the
 // hardware and by trapasm.S, and passed to trap().
+// 栈是从高到低顺序，而trapframe是从低到高，所以push的顺序是从trapframe最后一个字段开始的
 struct trapframe {
   // registers as pushed by pusha
   uint edi;
@@ -169,9 +170,9 @@ struct trapframe {
   ushort padding3;
   ushort ds;
   ushort padding4;
-  uint trapno;
+  uint trapno; // 异常号
 
-  // below here defined by x86 hardware
+  // below here defined by x86 hardware // 下面由硬件保存到栈上
   uint err;
   uint eip;
   ushort cs;

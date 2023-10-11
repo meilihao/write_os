@@ -106,6 +106,8 @@ struct segdesc {
 typedef uint pte_t;
 
 // Task state segment format
+// ssN、espN: 用来寻找栈的，x86提供0~3共四个级别，而TSS用来提升级别，所以低级别可以提升到高级别，提升之后需要把当前的任务状态保存起来，其实就是保存到ssX, espX指定的栈中
+// 比如从3提升到0，则CPU自动将任务状态保存到ss0:esp0指定的栈中，级别3这一组就不需要了，因为它是最低的级别了
 struct taskstate {
   uint link;         // Old ts selector
   uint esp0;         // Stack pointers and segment selectors

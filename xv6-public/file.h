@@ -32,6 +32,6 @@ struct devsw {
   int (*write)(struct inode*, char*, int);
 };
 
-extern struct devsw devsw[];
+extern struct devsw devsw[]; // devsw用来表示一个设备, 其中console是第1个设备
 
 #define CONSOLE 1

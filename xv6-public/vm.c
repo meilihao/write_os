@@ -162,6 +162,11 @@ switchkvm(void)
 }
 
 // Switch TSS and h/w page table to correspond to process p.
+// 设置cpu环境后，加载选中进程的页目录地址到cr3,切换为进程的页目录
+// pushcli和popcli实现如下功能：
+// 如果在调用pushcli之前，中断是关的，则调用popcli后中断还是关的。
+// 如果在调用pushcli之前，中断是开的，则调用pushcli关中断，调popcli之后开中断
+// TSS段用于恢复一个任务执行的处理器状态信息
 void
 switchuvm(struct proc *p)
 {
@@ -176,12 +181,12 @@ switchuvm(struct proc *p)
   mycpu()->gdt[SEG_TSS] = SEG16(STS_T32A, &mycpu()->ts,
                                 sizeof(mycpu()->ts)-1, 0);
   mycpu()->gdt[SEG_TSS].s = 0;
-  mycpu()->ts.ss0 = SEG_KDATA << 3;
-  mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE;
+  mycpu()->ts.ss0 = SEG_KDATA << 3; // 设置ss0，esp0的意思是：该进程以后被中断或者trap时，只要进入kernel，就使用这个stack，即trap时将使用进程的内核栈
+  mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE; // 该进程内核栈的栈底
   // setting IOPL=0 in eflags *and* iomb beyond the tss segment limit
   // forbids I/O instructions (e.g., inb and outb) from user space
   mycpu()->ts.iomb = (ushort) 0xFFFF;
-  ltr(SEG_TSS << 3);
+  ltr(SEG_TSS << 3); // 让CPU在执行iret时使用该TSS的内容
   lcr3(V2P(p->pgdir));  // switch to process's address space
   popcli();
 }
@@ -197,8 +202,8 @@ inituvm(pde_t *pgdir, char *init, uint sz)
     panic("inituvm: more than a page");
   mem = kalloc();
   memset(mem, 0, PGSIZE);
-  mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U);
-  memmove(mem, init, sz);
+  mappages(pgdir, 0, PGSIZE, V2P(mem), PTE_W|PTE_U); // 将物理内存映射到0虚拟地址处，页属性为用户页
+  memmove(mem, init, sz); // 将Initcode的代码拷贝到虚拟地址为0的地方: 此段代码是链接到0地址上的
 }
 
 // Load a program segment into pgdir.  addr must be page-aligned

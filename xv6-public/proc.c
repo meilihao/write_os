@@ -70,6 +70,7 @@ myproc(void) {
 // If found, change state to EMBRYO and initialize
 // state required to run in the kernel.
 // Otherwise return 0.
+// 从进程控制块数组中寻找一个空闲的进程控制块
 static struct proc*
 allocproc(void)
 {
@@ -86,7 +87,7 @@ allocproc(void)
   return 0;
 
 found:
-  p->state = EMBRYO;
+  p->state = EMBRYO; // 胚胎=初始
   p->pid = nextpid++;
 
   release(&ptable.lock);
@@ -99,14 +100,17 @@ found:
   sp = p->kstack + KSTACKSIZE;
 
   // Leave room for trap frame.
+  // 从栈顶开始为中断帧预留内存空间，并将中断帧起始地址记录在p->tf中
   sp -= sizeof *p->tf;
   p->tf = (struct trapframe*)sp;
 
   // Set up new context to start executing at forkret,
   // which returns to trapret.
+  // 将trapret函数地址记录在栈中
   sp -= 4;
   *(uint*)sp = (uint)trapret;
 
+  // 预留context空间，并将context起始地址记录在p->context中，同时将context空间清零
   sp -= sizeof *p->context;
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
@@ -117,28 +121,91 @@ found:
 
 //PAGEBREAK: 32
 // Set up first user process.
+// 初始化第一个进程运行所需要的栈中的数据
+/*
+进程的kernel stack初始化状态，
+
+                  /   +---------------+ <-- stack base(= p->kstack + KSTACKSIZE)
+                  |   | ss            |                           
+                  |   +---------------+                           
+                  |   | esp           |                           
+                  |   +---------------+                           
+                  |   | eflags        |                           
+                  |   +---------------+                           
+                  |   | cs            |                           
+                  |   +---------------+                           
+                  |   | eip           | <-- 从此往上部分，在iret时自动弹出到相关寄存器中，只需把%esp指到这里即可
+                  |   +---------------+    
+                  |   | err           |  
+                  |   +---------------+  
+                  |   | trapno        |  
+                  |   +---------------+                       
+                  |   | ds            |                           
+                  |   +---------------+                           
+                  |   | es            |                           
+                  |   +---------------+                           
+                  |   | fs            |                           
+ struct trapframe |   +---------------+                           
+                  |   | gs            |                           
+                  |   +---------------+   
+                  |   | eax           |   
+                  |   +---------------+   
+                  |   | ecx           |   
+                  |   +---------------+   
+                  |   | edx           |   
+                  |   +---------------+   
+                  |   | ebx           |   
+                  |   +---------------+                        
+                  |   | oesp          |   
+                  |   +---------------+   
+                  |   | ebp           |   
+                  |   +---------------+   
+                  |   | esi           |   
+                  |   +---------------+   
+                  |   | edi           |   
+                  \   +---------------+ <-- p->tf                 
+                      | trapret       | <-- 弹出进程tf，执行用户代码                     
+                  /   +---------------+ <-- forkret will return to
+                  |   | eip(=forkret) | <-- return addr           
+                  |   +---------------+                           
+                  |   | ebp           |                           
+                  |   +---------------+                           
+   struct context |   | ebx           |                           
+                  |   +---------------+                           
+                  |   | esi           |                           
+                  |   +---------------+                           
+                  |   | edi           |                           
+                  \   +-------+-------+ <-- p->context            
+                      |       |       |                           
+                      |       v       |                           
+                      |     empty     |                           
+                      +---------------+ <-- p->kstack           
+ */
 void
 userinit(void)
 {
   struct proc *p;
-  extern char _binary_initcode_start[], _binary_initcode_size[];
+  extern char _binary_initcode_start[], _binary_initcode_size[]; // initcode.S是第一个进程的用户空间程序，_binary_initcode_start表示这个程序代码在内存中的虚拟地址，_binary_initcode_size表示其大小
 
   p = allocproc();
   
   initproc = p;
-  if((p->pgdir = setupkvm()) == 0)
+  if((p->pgdir = setupkvm()) == 0) // 为新进程设置页目录和页表的内核空间部分的映射关系
     panic("userinit: out of memory?");
   inituvm(p->pgdir, _binary_initcode_start, (int)_binary_initcode_size);
   p->sz = PGSIZE;
+  //设置内核栈中的中断帧区域
+  // 中断帧被设置为了用户模式，用于假装使用用户模式产生中断进来的
   memset(p->tf, 0, sizeof(*p->tf));
   p->tf->cs = (SEG_UCODE << 3) | DPL_USER;
   p->tf->ds = (SEG_UDATA << 3) | DPL_USER;
   p->tf->es = p->tf->ds;
   p->tf->ss = p->tf->ds;
-  p->tf->eflags = FL_IF;
-  p->tf->esp = PGSIZE;
-  p->tf->eip = 0;  // beginning of initcode.S
+  p->tf->eflags = FL_IF; // 标志寄存器eflags被设置为允许中断模式
+  p->tf->esp = PGSIZE; // 表示用户栈的地址，被设置为虚拟地址4KB开始的地方，由此可知，第一个用户进程的代码和用户栈是在同一页中的, initcode开始执行后, 该代码所占空间就已经没用了
+  p->tf->eip = 0;  // beginning of initcode.S. init进程跟普通进程的差别就在这里了: init进程设置的eip=0，在此之前0这里已经放置了initcode.S的内容，而普通进程这里设置的是elf->entry，即程序的main()函数
 
+  // 设置新进程的名字和当前工作目录
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
 
@@ -319,6 +386,7 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+// [笔记07 - xv6 启动到执行第一个进程](https://jianzzz.github.io/2017/08/20/%E7%AC%94%E8%AE%B007-xv6-%E5%90%AF%E5%8A%A8%E5%88%B0%E6%89%A7%E8%A1%8C%E7%AC%AC%E4%B8%80%E4%B8%AA%E8%BF%9B%E7%A8%8B/)
 void
 scheduler(void)
 {
@@ -326,6 +394,7 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   
+  // scheduler函数首先打开当前核的中断，然后寻找状态为RUNNABLE的进程运行，如果找不到，则一直循环寻找，直到找到为止, 因此在xv6中没有idle线程
   for(;;){
     // Enable interrupts on this processor.
     sti();
@@ -343,7 +412,9 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
+      //调用swtch之后将不会返回内核，但会将下一条指令的eip进栈，swtch会保存context寄存器，并将cpu->scheduler指向保存位置，程序执行完毕后应该会返回执行内核代码，重新调度下一个进程。（中断时会执行相关中断处理函数，不会返回这里。）
+      //加载内核的页目录地址到cr3,切换为内核的页目录
+      swtch(&(c->scheduler), p->context); // swtch.S swtch会将当前context相关寄存器进栈，然后将cpu的context（即scheduler）指针指向当前esp（仍然是cpu栈，即在内核的指令和数据内存空间上），再将esp指向到进程的context，由于会改变cpu的scheduler指针指向，因此需要传递&cpu->scheduler
       switchkvm();
 
       // Process is done running for now.
