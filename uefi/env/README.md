@@ -7,6 +7,7 @@ ref:
 	target是arm
 
 	code: [hello-world-uefi](https://github.com/davysouza/hello-world-uefi)
+- [算能edk2](https://github.com/SOPHGO?q=edk&type=all&language=&sort=) from [SG2042 每周进展 (2023-11-10 #016)](https://forum.sophgo.com/t/sg2042-2023-11-10-016/418)
 
 edk2环境设置见`programming-interface/arch/uefi.md`.
 

@@ -10,12 +10,13 @@
 ## books
 - <<一个64位操作系统的设计与实现>>
 	- [code](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
+	- [next code](https://gitee.com/MINEOS_admin/publish)
 	- [author + new](https://www.ituring.com.cn/space/186920)
 	- [sOS64](https://github.com/jiebaomaster/sOS64)
 
 	作者的其他作品:
 	- [一个UEFI引导程序的实现 + 代码](https://www.ituring.com.cn/book/2763)
-
+- [**现代 64 位操作系统开发**](https://zhuanlan.zhihu.com/p/669481626)
 -  操作系统真象还原
 	- [《操作系统真象还原》源码及学习笔记（os-elephant）还原真相](https://github.com/yifengyou/os-elephant)
 	- [操作系统真象还原 学习笔记19--总结&感悟](https://www.kn0sky.com/?p=60)
@@ -42,3 +43,6 @@
 ## uefi
 - [UEFI BootLoader for ToyOS.](https://github.com/tanyugang/UEFI)
 - [uefi_specs_personal_collections](https://github.com/xiaopangzi313/uefi_specs_personal_collections)
+- [openEuler / lboot](https://gitee.com/openeuler/lboot)
+
+	由 Rust 语言实现的轻量级引导加载程序
