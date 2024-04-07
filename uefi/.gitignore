@@ -5,3 +5,5 @@ env/OVMF*.fd
 env/root2/efi/boot/*.efi
 env/root2/*.efi
 env/root2/*.BMP
+env/root2/system
+env/root2/system_api_lib

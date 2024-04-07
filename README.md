@@ -17,6 +17,8 @@
 	作者的其他作品:
 	- [一个UEFI引导程序的实现 + 代码](https://www.ituring.com.cn/book/2763)
 - [**现代 64 位操作系统开发**](https://zhuanlan.zhihu.com/p/669481626)
+
+	[原文](https://arttnba3.cn/2023/11/29/CODE-0X03-OSDEV64-I_UEFI-GRUB/)
 -  操作系统真象还原
 	- [《操作系统真象还原》源码及学习笔记（os-elephant）还原真相](https://github.com/yifengyou/os-elephant)
 	- [操作系统真象还原 学习笔记19--总结&感悟](https://www.kn0sky.com/?p=60)
@@ -39,6 +41,9 @@
 	- [12 Years of ToaruOS](https://gist.github.com/klange/f427a551af5f2f8b3c9ef80687883fcf)
 - [Google KataOS]()
 - [自制操作系统日记](https://developer.aliyun.com/article/1080227)
+- [RVOS的石榴派适配](https://gitee.com/RV4Kids/PLCT-Weekly/issues/I43DNU)
+
+	[开发一个RISC-V上的操作系统](https://gitee.com/RV4Kids/RVWeekly/issues/I3I74V)
 
 ## uefi
 - [UEFI BootLoader for ToyOS.](https://github.com/tanyugang/UEFI)

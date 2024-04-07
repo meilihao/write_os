@@ -18,6 +18,8 @@ build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
     - VideoSet
     - File
 
+- [zhenghuadai/uefi-programming/blob/master/book/FileIo/TestFileIo.c](https://github.com/zhenghuadai/uefi-programming)
+
 ## FAQ
 ### File/directory not found in workspace
 没有指定env PACKAGES_PATH, 获取其包含相对路径

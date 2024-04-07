@@ -29,3 +29,4 @@
     MyAppPkg/File/File.inf
     MyAppPkg/Bootloader-Simple/Bootloader.inf
     MyAppPkg/BootLoader/BootLoader.inf
+    MyAppPkg/UEFIBootLoader/BootLoader.inf
