@@ -51,3 +51,5 @@
 - [openEuler / lboot](https://gitee.com/openeuler/lboot)
 
 	由 Rust 语言实现的轻量级引导加载程序
+- [0x06 从零开始开发操作系统 UEFI](https://zhuanlan.zhihu.com/p/683894156)
+- [U盘UEFI引导OS内核的小白教程](https://blog.csdn.net/weixin_44391390/article/details/113459555)
