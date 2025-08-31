@@ -11,6 +11,8 @@
 - <<一个64位操作系统的设计与实现>>
 	- [code](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
 	- [next code](https://gitee.com/MINEOS_admin/publish)
+
+		- [publish/kernel/DeviceDriver](https://gitee.com/MINEOS_admin/publish/tree/develop/kernel/DeviceDriver)有很多驱动, 比如AHCI
 	- [author + new](https://www.ituring.com.cn/space/186920)
 	- [sOS64](https://github.com/jiebaomaster/sOS64)
 
@@ -29,6 +31,10 @@
 - [从零开始写 OS 内核](https://segmentfault.com/a/1190000040124650)
 - [xbook2](https://github.com/hzcx998/xbook2)
 - **xv6**
+
+	建议使用[master on eeb7b41@2020-08-10], 比xv6-rev11有少量改动.
+
+	- [xv6-labs](https://pdos.csail.mit.edu/6.828/2025/schedule.html) + [xv6-labs-2022-solutions](https://github.com/relaxcn/xv6-labs-2022-solutions/tree/main)
 - [跟我一起写操作系统](https://www.askpure.com/course_KH3775IW-COUS3DX1-1Y2VUM3Q-CE78MA15.html)
 
 ## ref
