@@ -15,6 +15,7 @@ EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL * Node)
 	return 0;
 }
 
+// 逐级打印出设备路径中的设备类型
 EFI_DEVICE_PATH_PROTOCOL* WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL* DevPath, EFI_STATUS (*Callbk)(EFI_DEVICE_PATH_PROTOCOL*))
 {
 	EFI_DEVICE_PATH_PROTOCOL* pDevPath = DevPath;
@@ -29,7 +30,8 @@ EFI_DEVICE_PATH_PROTOCOL* WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL* DevPat
 				break;
 			}
 		}
-		pDevPath = NextDevicePathNode (pDevPath); 
+		// NextDevicePathNode(): 查找指定设备路径节点的子节点
+		pDevPath = NextDevicePathNode (pDevPath);
 	}
 	return pDevPath;
 }
@@ -97,9 +99,9 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 
 	Print(L"---\n\n");
 
-	gBS->HandleProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,(VOID*)&LoadedImage);
+	gBS->HandleProtocol(ImageHandle,&gEfiLoadedImageProtocolGuid,(VOID**)&LoadedImage);
 	// LoadedImage->DeviceHandle: 加载 EFI 映像的设备句柄
-	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiDevicePathProtocolGuid,(VOID*)&DevicePath);
+	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiDevicePathProtocolGuid,(VOID**)&DevicePath);
 
 	TextDevicePath = Device2TextProtocol->ConvertDevicePathToText(DevicePath,FALSE,TRUE); 
 	Print(L"TextDevicePath:%s\n",TextDevicePath);
@@ -108,15 +110,15 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle,IN EFI_SYSTEM_TABLE *System
 	WalkthroughDevicePath(DevicePath,PrintNode); 
 	Print(L"\n");
 
-	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiSimpleFileSystemProtocolGuid,(VOID*)&Vol);
+	gBS->HandleProtocol(LoadedImage->DeviceHandle,&gEfiSimpleFileSystemProtocolGuid,(VOID**)&Vol);
 	Vol->OpenVolume(Vol,&RootFs);
 	RootFs->Open(RootFs,&FileHandle,(CHAR16*)L"kernel.bin",EFI_FILE_MODE_READ,0);
 
-	EFI_FILE_INFO* FileInfo;
+	EFI_FILE_INFO* FileInfo = NULL;
 	UINTN BufferSize = 0;
 	EFI_PHYSICAL_ADDRESS pages = 0x100000;
 
-	BufferSize = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 100;
+	FileHandle->GetInfo(FileHandle,&gEfiFileInfoGuid,&BufferSize,FileInfo);
 	gBS->AllocatePool(EfiRuntimeServicesData,BufferSize,(VOID**)&FileInfo); 
 	FileHandle->GetInfo(FileHandle,&gEfiFileInfoGuid,&BufferSize,FileInfo);
 	Print(L"\tFileName:%s\t Size:%d\t FileSize:%d\t Physical Size:%d\n",FileInfo->FileName,FileInfo->Size,FileInfo->FileSize,FileInfo->PhysicalSize);

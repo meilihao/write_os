@@ -30,9 +30,9 @@ qemu-system-x86_64 -machine q35 -bios /usr/share/qemu/OVMF.fd -drive format=raw,
 
 ### disk
 ```bash
-# qemu-img create -f raw hda.img 64M # 使用raw便于查看disk的内容
-# modprobe nbd max_part=8
-# ./setup.sh # 创建hda.img
-# ./deploy.sh # 设置hda.img
-# qemu-system-x86_64 -bios /usr/share/qemu/OVMF.fd -machine q35 -smp 4 -hda hda.img -m 256 -enable-kvm -cpu host [-net none] # 可能需要按几下键盘才能进入uefi shell
+$ modprobe nbd max_part=8
+$ qemu-img create -f raw hda.img 64M # 使用raw便于查看disk的内容
+$ sudo ./setup_image.sh # 创建hda.img
+$ sudo ./deploy_efi.sh xxx.efi # 设置hda.img, qemu-nbd需要sudo权限
+$ ./test_efi_image.sh
 ```

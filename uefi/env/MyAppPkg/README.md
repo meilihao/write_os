@@ -1,17 +1,28 @@
 # README
 **部分编译错误(no space)需要删除Build重新build, 否则再次build可能报错**
 
+## 项目
+1. HelloWorld: 开篇惯例
+1. Video: 输出图形设备的显示模式
+1. VideoSet: 设置图形设备的显示模式
+
 ## build
 ```bash
 cd edk2
 build -p OvmfPkg/OvmfPkgX64.dsc -a X64 -D DEBUG_ON_SERIAL_PORT -D DEBUG_LINE_NUMBER # ??? 自己编译的ovmf固件无法启动QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.13) + edk2-stable202308, 串口日志报`Broken CPU hotplug register block found`. 使用qemu自带的ovmf固件正常; DEBUG_LINE_NUMBER没效果
 cp Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd ..
+ln -s /home/chen/git/write_os/uefi/env/MyAppPkg .
 cd MyAppPkg
-build -p MyAppPkg/MyAppPkg.dsc -a X64 # `-p`是以edk2目录为根
+build -p MyAppPkg/MyAppPkg.dsc -a X64 [-m MyAppPkg/HelloWorld/HelloWorld.inf] # `-p`是以edk2目录为根, `-m`编译指定模块, 否则编译MyAppPkg.dsc中`[Components]`的所有模块
+```
+
+## 测试
+```bash
+$ ./test_efi.sh /home/chen/git/edk2/Build/HelloWorld/RELEASE_CLANGDWARF/X64/HelloWorld.efi
 ```
 
 ## example
-- [一个UEFI引导程序的实现](https://www.ituring.com.cn/book/2763)
+- [一个UEFI引导程序的实现](https://www.ituring.com.cn/book/3488)
 
     - Memory
     - Video

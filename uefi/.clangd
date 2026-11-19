@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    [
+      "-fshort-wchar",
+      "-I/data/tmpfs/edk2/MdePkg/Include",
+      "-I/data/tmpfs/edk2/MdePkg/Include/X64"
+    ]
