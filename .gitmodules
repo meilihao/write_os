@@ -1,3 +1,0 @@
-[submodule "uefi/env/mine_kernel"]
-	path = uefi/env/mine_kernel
-	url = git@gitee.com:chenhao/mine_kernel.git
