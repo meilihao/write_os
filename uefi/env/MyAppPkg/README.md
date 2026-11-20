@@ -5,6 +5,8 @@
 1. HelloWorld: 开篇惯例
 1. Video: 输出图形设备的显示模式
 1. VideoSet: 设置图形设备的显示模式
+1. File: 加载kernel.bin
+1. BootLoader: 加载kernel.bin, 并执行kernel.bin
 
 ## build
 ```bash

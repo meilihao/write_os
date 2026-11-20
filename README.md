@@ -10,8 +10,9 @@
 ## books
 建议仅关注UEFI + 64位操作系统.
 
-- <<一个64位操作系统的设计与实现>>, 已有第2版
-	- [code](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
+- <<一个64位操作系统的设计与实现 第二版>>
+	- [code v2](https://www.ituring.com.cn/book/3488)
+	- [~~code v1~~](https://github.com/yifengyou/The-design-and-implementation-of-a-64-bit-os)
 	- [next code](https://gitee.com/MINEOS_admin/publish)
 
 		- [publish/kernel/DeviceDriver](https://gitee.com/MINEOS_admin/publish/tree/develop/kernel/DeviceDriver)有很多驱动, 比如AHCI
@@ -22,8 +23,6 @@
 
 		- [64bitOS](https://github.com/JiaweiHH/64bitOS)
 
-	作者的其他作品:
-	- [一个UEFI引导程序的实现 + 代码](https://www.ituring.com.cn/book/2763)
 - [**现代 64 位操作系统开发**](https://zhuanlan.zhihu.com/p/669481626)
 
 	[原文](https://arttnba3.cn/2023/11/29/CODE-0X03-OSDEV64-I_UEFI-GRUB/)
@@ -87,4 +86,4 @@ todo:
 
 	由 Rust 语言实现的轻量级引导加载程序
 - [0x06 从零开始开发操作系统 UEFI](https://zhuanlan.zhihu.com/p/683894156)
-- [U盘UEFI引导OS内核的小白教程](https://blog.csdn.net/weixin_44391390/article/details/113459555)
+- [从零开始的UEFI裸机编程](https://kagurazakakotori.github.io/ubmp-cn/index.html)
